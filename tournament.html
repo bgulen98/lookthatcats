@@ -179,7 +179,7 @@
       width:0%;
       background:linear-gradient(90deg, #ff69b4, #ff9dd0);
       border-radius:999px;
-      transition:width .35s ease;
+      transition:width .25s ease;
     }
 
     .battle-area{
@@ -210,7 +210,7 @@
 
     .cat-choice.disabled{
       pointer-events:none;
-      opacity:.55;
+      opacity:.65;
     }
 
     .cat-choice img{
@@ -535,11 +535,10 @@
 
       <aside class="side-panel">
         <h3 class="leader-title">Top 10 Tournament Cats</h3>
-        <div class="leader-sub">Global today • shared by everyone visiting the site</div>
+        <div class="leader-sub">Global today • saved after completed tournaments</div>
         <div class="leader-list" id="leaderboard"></div>
         <div class="tiny-note">
-          These stats are global for today.  
-          Everyone sees the same rankings until the next daily reset.
+          Tournament results are submitted once at the end for a smoother experience.
         </div>
       </aside>
     </div>
@@ -554,8 +553,8 @@
     let currentPair = null;
     let completedMatches = 0;
     let tournamentDate = "";
-    let isVoting = false;
-    let safetyUnlockTimer = null;
+    let isAdvancing = false;
+    let localStats = {};
     const TOTAL_MATCHES = 31;
 
     function roundName(size) {
@@ -593,15 +592,6 @@
       document.getElementById("loadingNote").textContent = message;
     }
 
-    function unlockBattle(message = "") {
-      if (safetyUnlockTimer) {
-        clearTimeout(safetyUnlockTimer);
-        safetyUnlockTimer = null;
-      }
-      isVoting = false;
-      setBattleDisabled(false, message);
-    }
-
     function showExplosion(rate) {
       const el = document.getElementById("explosion");
       el.innerHTML = `${rate}% WIN RATE!<small>That cat just advanced ✨</small>`;
@@ -617,7 +607,7 @@
       el.innerHTML = "";
 
       if (!arr.length) {
-        el.innerHTML = `<div class="empty-state">No tournament cats ranked yet.<br>Start picking to build today’s top 10.</div>`;
+        el.innerHTML = `<div class="empty-state">No tournament cats ranked yet.<br>Finish a tournament to help build today’s top 10.</div>`;
         return;
       }
 
@@ -651,6 +641,27 @@
       renderLeaderboard(data.leaderboard || []);
     }
 
+    function ensureStat(cat) {
+      if (!localStats[cat.id]) {
+        localStats[cat.id] = {
+          w: 0,
+          v: 0,
+          url: cat.url
+        };
+      }
+    }
+
+    function recordLocalBattle(winnerCat, loserCat) {
+      ensureStat(winnerCat);
+      ensureStat(loserCat);
+
+      localStats[winnerCat.id].w += 1;
+      localStats[winnerCat.id].v += 1;
+      localStats[loserCat.id].v += 1;
+
+      return localStats[winnerCat.id];
+    }
+
     function renderCurrentMatch() {
       const round = rounds[currentRoundIndex];
 
@@ -663,88 +674,101 @@
       loadImage(document.getElementById("catA"), currentPair[0].url);
       loadImage(document.getElementById("catB"), currentPair[1].url);
       updateProgress();
-      unlockBattle("");
+      isAdvancing = false;
+      setBattleDisabled(false, "");
     }
 
-    async function nextMatch(winnerCat) {
-      if (isVoting) return;
-
-      isVoting = true;
-      setBattleDisabled(true, "Saving your pick...");
-
-      safetyUnlockTimer = setTimeout(() => {
-        unlockBattle("Connection issue. Please tap again.");
-      }, 12000);
+    function nextMatch(winnerCat) {
+      if (isAdvancing) return;
+      isAdvancing = true;
 
       const loserCat = currentPair[0].id === winnerCat.id ? currentPair[1] : currentPair[0];
+      const stat = recordLocalBattle(winnerCat, loserCat);
+      const rate = Math.round((stat.w / stat.v) * 100);
 
-      try {
-        const controller = new AbortController();
-        const timeout = setTimeout(() => controller.abort(), 8000);
+      showExplosion(rate);
+      setBattleDisabled(true, "Nice pick ✨");
 
-        const res = await fetch("/api/tournament/vote", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json"
-          },
-          body: JSON.stringify({
-            date: tournamentDate,
-            winnerId: winnerCat.id,
-            loserId: loserCat.id
-          }),
-          signal: controller.signal
-        });
+      const nextRoundIndex = currentRoundIndex + 1;
+      if (!rounds[nextRoundIndex]) rounds[nextRoundIndex] = [];
+      rounds[nextRoundIndex].push(winnerCat);
 
-        clearTimeout(timeout);
+      completedMatches += 1;
 
-        const data = await res.json();
+      setTimeout(() => {
+        currentMatchIndex += 2;
+        const currentRound = rounds[currentRoundIndex];
 
-        if (!res.ok || !data.winner) {
-          throw new Error("Vote failed");
+        if (currentMatchIndex >= currentRound.length) {
+          currentRoundIndex += 1;
+          currentMatchIndex = 0;
         }
 
-        const stat = data.winner;
-        const rate = Math.round((stat.w / stat.v) * 100);
-
-        fetchLeaderboard().catch(() => {});
-        showExplosion(rate);
-
-        const nextRoundIndex = currentRoundIndex + 1;
-        if (!rounds[nextRoundIndex]) rounds[nextRoundIndex] = [];
-        rounds[nextRoundIndex].push(winnerCat);
-
-        completedMatches += 1;
-
-        setTimeout(() => {
-          currentMatchIndex += 2;
-          const currentRound = rounds[currentRoundIndex];
-
-          if (currentMatchIndex >= currentRound.length) {
-            currentRoundIndex += 1;
-            currentMatchIndex = 0;
-          }
-
-          renderCurrentMatch();
-        }, 450);
-
-      } catch (err) {
-        console.error(err);
-        unlockBattle("Connection issue. Please tap again.");
-      }
+        renderCurrentMatch();
+      }, 280);
     }
 
-    function renderWinner(cat) {
+    async function submitTournamentResults(championCat) {
+      setBattleDisabled(true, "Saving your tournament result...");
+
+      const slimResults = {};
+      for (const [catId, stat] of Object.entries(localStats)) {
+        slimResults[catId] = {
+          w: stat.w,
+          v: stat.v
+        };
+      }
+
+      const res = await fetch("/api/tournament/submit", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          date: tournamentDate,
+          championId: championCat.id,
+          results: slimResults
+        })
+      });
+
+      const data = await res.json();
+
+      if (!res.ok || !data.success) {
+        throw new Error("Failed to submit tournament");
+      }
+
+      renderLeaderboard(data.leaderboard || []);
+      return data;
+    }
+
+    async function renderWinner(cat) {
       document.getElementById("battleArea").style.display = "none";
       document.getElementById("resultBox").classList.add("show");
       document.getElementById("winnerImg").src = cat.url;
+
+      const localChampionStat = localStats[cat.id];
+      const localRate = localChampionStat ? Math.round((localChampionStat.w / localChampionStat.v) * 100) : 100;
+
       document.getElementById("winnerMeta").textContent =
-        `Your champion made it through today’s bracket.`;
-      unlockBattle("");
+        `Your champion finished your bracket with a ${localRate}% win rate.`;
 
       document.getElementById("shareWinnerBtn").onclick = () => shareCat(
         cat.url,
         "I just finished today’s cat tournament and crowned this champion!"
       );
+
+      try {
+        const data = await submitTournamentResults(cat);
+        if (data.champion) {
+          const globalRate = Math.round((data.champion.w / data.champion.v) * 100);
+          document.getElementById("winnerMeta").textContent =
+            `Your champion now holds a global ${globalRate}% win rate today.`;
+        }
+        setBattleDisabled(false, "Tournament saved 💖");
+      } catch (err) {
+        console.error(err);
+        setBattleDisabled(false, "Could not save your result. You can still share your winner.");
+      }
     }
 
     async function shareCat(url, text = "Look at this cute cat from LookThatCats!") {
@@ -770,9 +794,13 @@
       currentMatchIndex = 0;
       currentPair = null;
       completedMatches = 0;
+      isAdvancing = false;
+      localStats = {};
+
       document.getElementById("battleArea").style.display = "grid";
       document.getElementById("resultBox").classList.remove("show");
-      unlockBattle("");
+      setBattleDisabled(false, "");
+
       renderCurrentMatch();
     }
 
