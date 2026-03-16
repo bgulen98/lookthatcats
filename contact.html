@@ -1,57 +1,103 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
 
 <title>Contact - LookThatCats</title>
+<meta name="description" content="Contact LookThatCats for feedback, suggestions, and questions.">
+<meta name="keywords" content="contact lookthatcats, contact cat website">
+<meta name="robots" content="index,follow">
+<meta name="theme-color" content="#121212">
+
+<link rel="icon" type="image/svg+xml" href="/pink-cat-logo.svg?v=2">
+<link href="https://fonts.googleapis.com/css2?family=Pacifico&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
 
 <style>
 body{
-background:#121212;
-color:white;
-font-family:Arial;
-max-width:800px;
-margin:auto;
-padding:40px;
+  margin:0;
+  background:#121212;
+  color:#f3f3f3;
+  font-family:Inter, Arial, sans-serif;
 }
-
-       .footer{
-       margin-top:60px;
-       padding:30px;
-       text-align:center;
-       color:#888;
-      font-size:14px;
-    }
-
-  
+.page{
+  max-width:900px;
+  margin:0 auto;
+  padding:28px 18px 50px;
+}
+.logo{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  color:#ff69b4;
+  font-weight:800;
+  font-size:28px;
+  margin-bottom:18px;
+}
+.logo img{width:52px;height:52px}
+.back-home{
+  display:inline-block;
+  margin-bottom:20px;
+  text-decoration:none;
+  color:white;
+  background:#1f1f1f;
+  border:1px solid #303030;
+  padding:10px 14px;
+  border-radius:999px;
+}
+h1{
+  font-family:Pacifico,cursive;
+  color:#ff69b4;
+  font-weight:400;
+  font-size:42px;
+}
+p{
+  line-height:1.8;
+  color:#d9d9d9;
+}
+.footer{
+  margin-top:60px;
+  padding:30px 20px;
+  text-align:center;
+  color:#888;
+  font-size:14px;
+}
+.footer-links{
+  display:flex;
+  justify-content:center;
+  gap:18px;
+  flex-wrap:wrap;
+  margin-bottom:12px;
+}
+.footer-links a{color:#aaa;text-decoration:none}
+.footer-links a:hover{color:#fff}
+.footer-copy{color:#777}
 </style>
-
 </head>
-
 <body>
+<div class="page">
+  <a class="back-home" href="/index.html">← Back to Home</a>
 
-<h1>Contact</h1>
+  <div class="logo">
+    <img src="/pink-cat-logo.svg" alt="LookThatCats logo">
+    <span>LookThatCats</span>
+  </div>
 
-<p>
-If you have any questions, suggestions or feedback about LookThatCats,
-feel free to contact us.
-</p>
+  <h1>Contact</h1>
 
-<p>
-Email:
-contact@lookthatcats.vip
-</p>
+  <p>If you have feedback, suggestions, or questions about LookThatCats, feel free to get in touch.</p>
+  <p>Email: contact@lookthatcats.vip</p>
+  <p>Typical response time: 24–48 hours.</p>
 
-<p>
-We usually respond within a few days.
-</p>
-
-      <footer class="footer">
-© 2026 LookThatCats • Daily Cat Tournament
-    </footer>
-
-  
+  <footer class="footer">
+    <div class="footer-links">
+      <a href="/about.html">About</a>
+      <a href="/privacy.html">Privacy</a>
+      <a href="/terms.html">Terms</a>
+      <a href="/contact.html">Contact</a>
+    </div>
+    <div class="footer-copy">© 2026 LookThatCats • Daily Cat Tournament</div>
+  </footer>
+</div>
 </body>
 </html>
