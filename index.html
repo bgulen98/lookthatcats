@@ -3,202 +3,157 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Look That Cats 😺</title>
+<title>LookThatCats</title>
 <style>
-  /* ---------------- Gece modu ve genel tasarım ---------------- */
   body {
-    font-family: 'Arial', sans-serif;
     background-color: #121212;
     color: #eee;
+    font-family: 'Arial', sans-serif;
     margin: 0;
     padding: 0;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    min-height: 100vh;
-    position: relative;
-  }
-  h1 {
-    margin-top: 30px;
-    font-size: 2rem;
     text-align: center;
   }
+  h1 { margin: 20px; }
   .container {
     display: flex;
     justify-content: center;
-    margin: 30px 0;
     gap: 20px;
     flex-wrap: wrap;
-  }
-  img {
-    width: 300px;
-    height: 300px;
-    object-fit: cover;
-    border-radius: 15px;
-    cursor: pointer;
-    transition: transform 0.2s, box-shadow 0.2s;
-    box-shadow: 0 4px 8px rgba(0,0,0,0.5);
-  }
-  img:hover {
-    transform: scale(1.05);
-    box-shadow: 0 8px 16px rgba(0,0,0,0.7);
-  }
-  button {
-    padding: 12px 25px;
-    font-size: 18px;
-    border-radius: 8px;
-    border: none;
-    cursor: pointer;
-    background-color: #ff9800;
-    color: #121212;
-    margin-bottom: 30px;
-    transition: background 0.2s;
-  }
-  button:hover {
-    background-color: #e68900;
-  }
-  footer {
     margin-bottom: 20px;
-    font-size: 0.9rem;
-    color: #aaa;
   }
-
-  /* ---------------- Sağ ve sol banner ---------------- */
-  .side-ad {
+  .container img {
+    width: 200px;
+    height: 200px;
+    object-fit: cover;
+    border-radius: 10px;
+    transition: transform 0.3s;
+    cursor: pointer;
+  }
+  .container img:hover { transform: scale(1.05); }
+  #nextBtn {
+    padding: 10px 20px;
+    background-color: #1f1f1f;
+    color: #eee;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    margin-bottom: 30px;
+    font-size: 18px;
+  }
+  #topCatsContainer {
+    margin-top: 40px;
+  }
+  #topCatsContainer h2 { margin-bottom: 10px; }
+  .top-cat-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit,minmax(120px,1fr));
+    gap: 15px;
+    justify-items: center;
+  }
+  .top-cat-grid img {
+    width: 100px;
+    height: 100px;
+    object-fit: cover;
+    border-radius: 10px;
+    transition: transform 0.3s;
+  }
+  .top-cat-grid img:hover { transform: scale(1.1); }
+  /* Banner alanları */
+  #left-ad, #right-ad {
     position: fixed;
-    top: 50%;
-    transform: translateY(-50%);
+    top: 100px;
     width: 120px;
-    z-index: 1000;
+    height: 600px;
+    background-color: #222;
+    color: #aaa;
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
   #left-ad { left: 0; }
   #right-ad { right: 0; }
-
-  /* ---------------- Alt banner ---------------- */
   #bottom-ad {
+    width: 100%;
+    height: 90px;
+    background-color: #222;
+    color: #aaa;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     position: fixed;
     bottom: 0;
-    width: 100%;
-    text-align: center;
-    z-index: 1000;
-  }
-
-  /* ---------------- Leaderboard ---------------- */
-  .leaderboard {
-    margin-top: 20px;
-    width: 90%;
-    max-width: 400px;
-    background-color: #1e1e1e;
-    border-radius: 12px;
-    padding: 15px;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.5);
-  }
-  .leaderboard h2 {
-    margin-top: 0;
-    text-align: center;
-    font-size: 1.2rem;
-    color: #ff9800;
-  }
-  .leaderboard ul {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-  }
-  .leaderboard li {
-    padding: 5px 0;
-    border-bottom: 1px solid #333;
   }
 </style>
 </head>
 <body>
 
-<h1>Look That Cats 😺 Which One Wins?</h1>
+<div id="left-ad">Left Banner</div>
+<div id="right-ad">Right Banner</div>
 
-<!-- ---------------- Reklam alanları ---------------- -->
-<div id="left-ad" class="side-ad">
-  <!-- INSERT LEFT ADSENSE CODE HERE -->
-</div>
-<div id="right-ad" class="side-ad">
-  <!-- INSERT RIGHT ADSENSE CODE HERE -->
-</div>
+<h1>LookThatCats 🐱</h1>
 
-<!-- ---------------- Kedi battle ---------------- -->
 <div class="container">
-  <img id="cat1" alt="Cat 1">
-  <img id="cat2" alt="Cat 2">
+  <img id="cat1" src="" alt="Cat 1">
+  <img id="cat2" src="" alt="Cat 2">
+</div>
+<button id="nextBtn">Next Battle 🐾</button>
+
+<div id="topCatsContainer">
+  <h2>Today's Top Cats</h2>
+  <div id="topCats" class="top-cat-grid"></div>
 </div>
 
-<button id="nextBtn">Next Battle</button>
-
-<!-- ---------------- Leaderboard ---------------- -->
-<div class="leaderboard">
-  <h2>Top Scores</h2>
-  <ul id="leaderboardList"></ul>
-</div>
-
-<!-- ---------------- Alt banner ---------------- -->
-<div id="bottom-ad">
-  <!-- INSERT BOTTOM ADSENSE CODE HERE -->
-</div>
-
-<footer>Random cats powered by <a href="https://unsplash.com" target="_blank" style="color:#ff9800;">Unsplash</a></footer>
+<div id="bottom-ad">Bottom Banner</div>
 
 <script>
-  // ---------------- Random kedi ----------------
-  function randomCat() {
-    return "https://placekitten.com/400/400?image=" + Math.floor(Math.random()*16);
-  }
+const API_KEY = "live_fDX7IYEHhfAbsRlNUYMHWpBRLFjjra8l8ixoHazYl93KLEkPHf5yUuV6OhabAb7R";
 
-  function loadCats() {
-    document.getElementById("cat1").src = randomCat();
-    document.getElementById("cat2").src = randomCat();
-  }
-
-  window.onload = () => {
-    loadCats();
-    updateLeaderboard();
-  };
-
-  // ---------------- Puanlama ve leaderboard ----------------
-  let leaderboard = JSON.parse(localStorage.getItem("catLeaderboard") || "[]");
-
-  function saveScore(score) {
-    leaderboard.push(score);
-    leaderboard.sort((a,b)=>b-a);
-    if(leaderboard.length>5) leaderboard = leaderboard.slice(0,5);
-    localStorage.setItem("catLeaderboard", JSON.stringify(leaderboard));
-    updateLeaderboard();
-  }
-
-  function updateLeaderboard() {
-    const list = document.getElementById("leaderboardList");
-    list.innerHTML = "";
-    leaderboard.forEach((score,i)=>{
-      const li = document.createElement("li");
-      li.textContent = `${i+1}. ${score} pts`;
-      list.appendChild(li);
-    });
-  }
-
-  // ---------------- Next Battle ----------------
-  document.getElementById("nextBtn").addEventListener("click", () => {
-    // Kullanıcı rastgele puan alıyor (simülasyon)
-    const score = Math.floor(Math.random()*10+1);
-    saveScore(score);
-    loadCats();
+// Rastgele 2 battle kedisi yükle
+async function loadBattleCats() {
+  const res1 = await fetch("https://api.thecatapi.com/v1/images/search", {
+    headers: {'x-api-key': API_KEY}
   });
+  const cat1 = await res1.json();
+  document.getElementById("cat1").src = cat1[0].url;
 
-  // ---------------- Kedi resimlerine tıklayınca da battle ----------------
-  document.getElementById("cat1").addEventListener("click", ()=>{
-    const score = Math.floor(Math.random()*10+1);
-    saveScore(score);
-    loadCats();
+  const res2 = await fetch("https://api.thecatapi.com/v1/images/search", {
+    headers: {'x-api-key': API_KEY}
   });
-  document.getElementById("cat2").addEventListener("click", ()=>{
-    const score = Math.floor(Math.random()*10+1);
-    saveScore(score);
-    loadCats();
+  const cat2 = await res2.json();
+  document.getElementById("cat2").src = cat2[0].url;
+}
+
+// Top 10 kediyi 24 saatte bir yenile
+async function loadTopCats() {
+  const today = new Date().toISOString().slice(0,10); // YYYY-MM-DD
+  let saved = JSON.parse(localStorage.getItem("topCatsData"));
+  if (!saved || saved.date !== today) {
+    const topCats = [];
+    for (let i=0;i<10;i++){
+      const res = await fetch("https://api.thecatapi.com/v1/images/search", {
+        headers: {'x-api-key': API_KEY}
+      });
+      const data = await res.json();
+      topCats.push(data[0].url);
+    }
+    localStorage.setItem("topCatsData", JSON.stringify({date: today, urls: topCats}));
+    saved = {date: today, urls: topCats};
+  }
+  const container = document.getElementById("topCats");
+  container.innerHTML = "";
+  saved.urls.forEach(url=>{
+    const img = document.createElement("img");
+    img.src = url;
+    container.appendChild(img);
   });
+}
+
+// Başlangıçta yükle
+loadBattleCats();
+loadTopCats();
+
+// Next Battle butonuna bağla
+document.getElementById("nextBtn").addEventListener("click", loadBattleCats);
 </script>
 
 </body>
