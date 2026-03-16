@@ -14,6 +14,7 @@
     :root{
       --bg:#121212;
       --panel:#1a1a1a;
+      --panel-2:#202020;
       --text:#f5f5f5;
       --muted:#a8a8a8;
       --line:#2d2d2d;
@@ -114,7 +115,10 @@
       backdrop-filter:blur(8px);
     }
 
-    .main-panel{ padding:22px; }
+    .main-panel{
+      padding:22px;
+    }
+
     .side-panel{
       padding:18px;
       position:sticky;
@@ -146,7 +150,9 @@
       white-space:nowrap;
     }
 
-    .progress-wrap{ margin:10px 0 22px; }
+    .progress-wrap{
+      margin:10px 0 22px;
+    }
 
     .progress-top{
       display:flex;
@@ -209,7 +215,9 @@
       background:#1f1f1f;
     }
 
-    .cat-choice img.loaded{ opacity:1; }
+    .cat-choice img.loaded{
+      opacity:1;
+    }
 
     .cat-choice .label{
       margin-top:12px;
@@ -283,7 +291,9 @@
       text-align:center;
     }
 
-    .result-box.show{ display:block; }
+    .result-box.show{
+      display:block;
+    }
 
     .winner-title{
       font-family:'Pacifico', cursive;
@@ -328,7 +338,9 @@
       color:#161616;
     }
 
-    .btn-primary:hover{ transform:translateY(-1px); }
+    .btn-primary:hover{
+      transform:translateY(-1px);
+    }
 
     .btn-secondary{
       background:#262626;
@@ -411,8 +423,12 @@
     }
 
     @media (max-width: 980px){
-      .layout{ grid-template-columns:1fr; }
-      .side-panel{ position:static; }
+      .layout{
+        grid-template-columns:1fr;
+      }
+      .side-panel{
+        position:static;
+      }
     }
 
     @media (max-width: 720px){
@@ -424,8 +440,12 @@
         width:72px;
         height:72px;
       }
-      .main-panel{ padding:16px; }
-      .panel-title{ font-size:20px; }
+      .main-panel{
+        padding:16px;
+      }
+      .panel-title{
+        font-size:20px;
+      }
     }
   </style>
 </head>
@@ -490,11 +510,11 @@
 
       <aside class="side-panel">
         <h3 class="leader-title">Top 10 Tournament Cats</h3>
-        <div class="leader-sub">Saved for 24 hours • shows today’s most selected cats</div>
+        <div class="leader-sub">Global today • shared by everyone visiting the site</div>
         <div class="leader-list" id="leaderboard"></div>
         <div class="tiny-note">
-          Win rate = wins / appearances.  
-          These stats stay saved for the current day and reset tomorrow.
+          These stats are global for today.  
+          Everyone sees the same rankings until the next daily reset.
         </div>
       </aside>
     </div>
@@ -503,76 +523,13 @@
   <div class="explosion" id="explosion"></div>
 
   <script>
-    const API = "https://api.thecatapi.com/v1/images/search";
-    const KEY = "live_fDX7IYEHhfAbsRlNUYMHWpBRLFjjra8l8ixoHazYl93KLEkPHf5yUuV6OhabAb7R";
-    const STORE_KEY = "ltc_daily_tournament_bundle_v3";
-
-    let tournamentCats = [];
     let rounds = [];
     let currentRoundIndex = 0;
     let currentMatchIndex = 0;
     let currentPair = null;
     let completedMatches = 0;
+    let tournamentDate = "";
     const TOTAL_MATCHES = 31;
-
-    function todayKey() {
-      return new Date().toISOString().slice(0, 10);
-    }
-
-    async function fetchCats(n) {
-      const res = await fetch(`${API}?limit=${n}`, {
-        headers: { "x-api-key": KEY }
-      });
-      const data = await res.json();
-      return data.map((x, i) => ({
-        id: "",
-        url: x.url
-      }));
-    }
-
-    function makeNewBundle(rawCats) {
-      const cats = rawCats.map((cat, index) => ({
-        id: `cat_${index + 1}`,
-        url: cat.url
-      }));
-
-      return {
-        date: todayKey(),
-        cats,
-        stats: {}
-      };
-    }
-
-    async function getBundle() {
-      const saved = localStorage.getItem(STORE_KEY);
-
-      if (saved) {
-        try {
-          const parsed = JSON.parse(saved);
-          if (
-            parsed.date === todayKey() &&
-            Array.isArray(parsed.cats) &&
-            parsed.cats.length === 32 &&
-            typeof parsed.stats === "object"
-          ) {
-            return parsed;
-          }
-        } catch (e) {}
-      }
-
-      const rawCats = await fetchCats(32);
-      const bundle = makeNewBundle(rawCats);
-      saveBundle(bundle);
-      return bundle;
-    }
-
-    function saveBundle(bundle) {
-      localStorage.setItem(STORE_KEY, JSON.stringify(bundle));
-    }
-
-    async function ensureBundle() {
-      return await getBundle();
-    }
 
     function roundName(size) {
       if (size === 32) return "Round of 32";
@@ -613,21 +570,7 @@
       }, 3000);
     }
 
-    function updateLeaderboardFromBundle(bundle) {
-      const stats = bundle.stats || {};
-      let arr = Object.values(stats);
-
-      arr = arr.filter(x => x.v >= 1);
-
-      arr.sort((a, b) => {
-        const rateA = a.w / a.v;
-        const rateB = b.w / b.v;
-        if (rateB !== rateA) return rateB - rateA;
-        return b.v - a.v;
-      });
-
-      arr = arr.slice(0, 10);
-
+    function renderLeaderboard(arr) {
       const el = document.getElementById("leaderboard");
       el.innerHTML = "";
 
@@ -653,24 +596,17 @@
       });
     }
 
-    async function recordTournamentBattle(winCat, loseCat) {
-      const bundle = await ensureBundle();
-      const stats = bundle.stats;
+    async function fetchTournament() {
+      const res = await fetch("/api/tournament/init");
+      const data = await res.json();
+      tournamentDate = data.date;
+      return data;
+    }
 
-      if (!stats[winCat.id]) {
-        stats[winCat.id] = { id: winCat.id, url: winCat.url, w: 0, v: 0 };
-      }
-
-      if (!stats[loseCat.id]) {
-        stats[loseCat.id] = { id: loseCat.id, url: loseCat.url, w: 0, v: 0 };
-      }
-
-      stats[winCat.id].w += 1;
-      stats[winCat.id].v += 1;
-      stats[loseCat.id].v += 1;
-
-      saveBundle(bundle);
-      return stats[winCat.id];
+    async function fetchLeaderboard() {
+      const res = await fetch("/api/tournament/leaderboard");
+      const data = await res.json();
+      renderLeaderboard(data.leaderboard || []);
     }
 
     function renderCurrentMatch() {
@@ -682,21 +618,37 @@
       }
 
       currentPair = [round[currentMatchIndex], round[currentMatchIndex + 1]];
-
       loadImage(document.getElementById("catA"), currentPair[0].url);
       loadImage(document.getElementById("catB"), currentPair[1].url);
-
       updateProgress();
     }
 
     async function nextMatch(winnerCat) {
       const loserCat = currentPair[0].id === winnerCat.id ? currentPair[1] : currentPair[0];
 
-      const stat = await recordTournamentBattle(winnerCat, loserCat);
+      const res = await fetch("/api/tournament/vote", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          date: tournamentDate,
+          winnerId: winnerCat.id,
+          loserId: loserCat.id
+        })
+      });
+
+      const data = await res.json();
+
+      if (!res.ok || !data.winner) {
+        alert("Something went wrong. Please try again.");
+        return;
+      }
+
+      const stat = data.winner;
       const rate = Math.round((stat.w / stat.v) * 100);
 
-      const freshBundle = await ensureBundle();
-      updateLeaderboardFromBundle(freshBundle);
+      await fetchLeaderboard();
       showExplosion(rate);
 
       const nextRoundIndex = currentRoundIndex + 1;
@@ -718,17 +670,12 @@
       }, 450);
     }
 
-    async function renderWinner(cat) {
+    function renderWinner(cat) {
       document.getElementById("battleArea").style.display = "none";
       document.getElementById("resultBox").classList.add("show");
       document.getElementById("winnerImg").src = cat.url;
-
-      const bundle = await ensureBundle();
-      const stat = bundle.stats[cat.id];
-      const rate = stat ? Math.round((stat.w / stat.v) * 100) : 100;
-
       document.getElementById("winnerMeta").textContent =
-        `Your champion finished with a ${rate}% win rate in today’s bracket.`;
+        `Your champion made it through today’s bracket.`;
 
       document.getElementById("shareWinnerBtn").onclick = () => shareCat(
         cat.url,
@@ -754,8 +701,7 @@
     }
 
     function startTournament(cats) {
-      tournamentCats = cats.slice();
-      rounds = [tournamentCats.slice()];
+      rounds = [cats.slice()];
       currentRoundIndex = 0;
       currentMatchIndex = 0;
       currentPair = null;
@@ -776,17 +722,15 @@
     });
 
     document.getElementById("restartBtn").addEventListener("click", async () => {
-      const bundle = await ensureBundle();
-      bundle.stats = {};
-      saveBundle(bundle);
-      updateLeaderboardFromBundle(bundle);
-      startTournament(bundle.cats);
+      const data = await fetchTournament();
+      startTournament(data.cats);
+      await fetchLeaderboard();
     });
 
     (async function init() {
-      const bundle = await ensureBundle();
-      updateLeaderboardFromBundle(bundle);
-      startTournament(bundle.cats);
+      const data = await fetchTournament();
+      startTournament(data.cats);
+      await fetchLeaderboard();
     })();
   </script>
 </body>
