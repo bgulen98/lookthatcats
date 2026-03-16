@@ -2,49 +2,102 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>About - LookThatCats</title>
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
 
-<meta name="description" content="About LookThatCats - a fun website where users rate and discover cute cats from around the internet.">
+<title>About - LookThatCats</title>
+<meta name="description" content="Learn more about LookThatCats, the daily cat tournament and cat voting website.">
+<meta name="keywords" content="about lookthatcats, cat voting website, daily cat tournament">
+<meta name="robots" content="index,follow">
+<meta name="theme-color" content="#121212">
+
+<link rel="icon" type="image/svg+xml" href="/pink-cat-logo.svg?v=2">
+<link href="https://fonts.googleapis.com/css2?family=Pacifico&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
 
 <style>
 body{
-background:#121212;
-color:white;
-font-family:Arial;
-max-width:800px;
-margin:auto;
-padding:40px;
-line-height:1.6;
+  margin:0;
+  background:#121212;
+  color:#f3f3f3;
+  font-family:Inter, Arial, sans-serif;
 }
-a{color:#ff69b4}
+.page{
+  max-width:900px;
+  margin:0 auto;
+  padding:28px 18px 50px;
+}
+.logo{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  color:#ff69b4;
+  font-weight:800;
+  font-size:28px;
+  margin-bottom:18px;
+}
+.logo img{width:52px;height:52px}
+.back-home{
+  display:inline-block;
+  margin-bottom:20px;
+  text-decoration:none;
+  color:white;
+  background:#1f1f1f;
+  border:1px solid #303030;
+  padding:10px 14px;
+  border-radius:999px;
+}
+h1{
+  font-family:Pacifico,cursive;
+  color:#ff69b4;
+  font-weight:400;
+  font-size:42px;
+}
+p{
+  line-height:1.8;
+  color:#d9d9d9;
+}
+.footer{
+  margin-top:60px;
+  padding:30px 20px;
+  text-align:center;
+  color:#888;
+  font-size:14px;
+}
+.footer-links{
+  display:flex;
+  justify-content:center;
+  gap:18px;
+  flex-wrap:wrap;
+  margin-bottom:12px;
+}
+.footer-links a{color:#aaa;text-decoration:none}
+.footer-links a:hover{color:#fff}
+.footer-copy{color:#777}
 </style>
-
 </head>
-
 <body>
+<div class="page">
+  <a class="back-home" href="/index.html">← Back to Home</a>
 
-<h1>About LookThatCats</h1>
+  <div class="logo">
+    <img src="/pink-cat-logo.svg" alt="LookThatCats logo">
+    <span>LookThatCats</span>
+  </div>
 
-<p>
-LookThatCats is a fun project created for cat lovers around the world.
-Visitors can discover random cats, rate them and share their favorites
-with friends on social media.
-</p>
+  <h1>About</h1>
 
-<p>
-Our goal is simple: bring a little joy to the internet by showcasing
-cute cats and letting users interact with them.
-</p>
+  <p>LookThatCats is a playful website built for cat lovers who enjoy voting, discovering cute cats, and playing daily cat tournaments.</p>
+  <p>Our goal is simple: make the internet a little more fun with daily cat brackets, cat battles, and shareable cat moments.</p>
+  <p>We use publicly available cat images and lightweight tools to create a fun daily experience for visitors around the world.</p>
 
-<p>
-Images are provided by public APIs and belong to their respective owners.
-</p>
-
-<p>
-Return to the homepage:
-<a href="/">LookThatCats</a>
-</p>
-
+  <footer class="footer">
+    <div class="footer-links">
+      <a href="/about.html">About</a>
+      <a href="/privacy.html">Privacy</a>
+      <a href="/terms.html">Terms</a>
+      <a href="/contact.html">Contact</a>
+    </div>
+    <div class="footer-copy">© 2026 LookThatCats • Daily Cat Tournament</div>
+  </footer>
+</div>
 </body>
 </html>
