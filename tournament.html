@@ -20,8 +20,6 @@
       --pink:#ff69b4;
       --pink-soft:#ff8cc8;
       --gold:#ffd76a;
-      --silver:#d6d9e0;
-      --bronze:#d89a63;
       --shadow:0 10px 30px rgba(0,0,0,.28);
     }
 
@@ -216,9 +214,9 @@
       box-shadow:0 12px 28px rgba(0,0,0,.3);
     }
 
-    .cat-choice.disabled{
+    .cat-choice.locked{
       pointer-events:none;
-      opacity:.65;
+      opacity:.72;
     }
 
     .cat-choice img{
@@ -229,7 +227,7 @@
       border-radius:16px;
       display:block;
       opacity:0;
-      transition:opacity .25s ease;
+      transition:opacity .22s ease;
       background:#1f1f1f;
     }
 
@@ -425,7 +423,7 @@
       border-radius:999px;
       background:radial-gradient(circle, rgba(255,105,180,.22) 0%, rgba(255,105,180,.08) 42%, transparent 70%);
       filter:blur(4px);
-      animation: pulseGlow 1.8s infinite ease-in-out;
+      animation:pulseGlow 1.8s infinite ease-in-out;
     }
 
     @keyframes pulseGlow{
@@ -507,7 +505,6 @@
 
     .winner-glow{
       position:absolute;
-      inset:auto 50% auto auto;
       left:50%;
       top:42%;
       transform:translate(-50%,-50%);
@@ -567,35 +564,19 @@
       z-index:1;
     }
 
-    .stage-quarter .round-glow,
-    .stage-semi .round-glow,
-    .stage-final .round-glow{
-      width:220px;
-      height:220px;
-    }
-
-    .stage-quarter .round-title{
-      color:#ff9dd0;
-    }
-
+    .stage-quarter .round-title{ color:#ff9dd0; }
     .stage-semi .round-title{
       color:#ffd8ee;
       text-shadow:0 0 16px rgba(255,105,180,.16);
     }
-
     .stage-final .round-title{
       color:var(--gold);
       text-shadow:0 0 18px rgba(255,215,106,.18);
     }
 
     @media (max-width: 980px){
-      .layout{
-        grid-template-columns:1fr;
-      }
-
-      .side-panel{
-        position:static;
-      }
+      .layout{ grid-template-columns:1fr; }
+      .side-panel{ position:static; }
     }
 
     @media (max-width: 720px){
@@ -659,9 +640,7 @@
           <div class="round-badge" id="roundBadge">Next Stage</div>
           <div class="round-glow"></div>
           <h3 class="round-title" id="roundScreenTitle">Sweet 16</h3>
-          <div class="round-desc" id="roundScreenDesc">
-            You made it through the first wave. Ready for the next stage?
-          </div>
+          <div class="round-desc" id="roundScreenDesc"></div>
           <button class="btn btn-primary" id="continueRoundBtn">Continue</button>
         </div>
 
@@ -722,6 +701,7 @@
     let completedMatches = 0;
     let tournamentDate = "";
     let isAdvancing = false;
+    let readyForPick = false;
     let localStats = {};
     const TOTAL_MATCHES = 31;
 
@@ -742,10 +722,10 @@
     }
 
     function roundDescription(size) {
-      if (size === 16) return "Your first 16 winners are in. Things are getting cuter now.";
-      if (size === 8) return "Only the strongest fluff remains. Welcome to the Quarter Finals.";
-      if (size === 4) return "These cats are elite. Semi Finals unlocked.";
-      if (size === 2) return "This is it. One last battle decides today’s champion.";
+      if (size === 16) return "Your first 16 winners are in. Ready for the next wave?";
+      if (size === 8) return "Only the strongest fluff remains. Quarter Finals unlocked.";
+      if (size === 4) return "These cats are elite. Semi Finals begin now.";
+      if (size === 2) return "One last battle decides today’s champion.";
       return "Ready for the next stage?";
     }
 
@@ -763,16 +743,50 @@
       document.getElementById("matchLabel").textContent = `Match ${currentMatch} / ${totalMatchesThisRound}`;
     }
 
-    function loadImage(img, url) {
-      img.classList.remove("loaded");
-      img.onload = () => img.classList.add("loaded");
-      img.src = url;
+    function lockChoices(message = "") {
+      document.getElementById("choiceA").classList.add("locked");
+      document.getElementById("choiceB").classList.add("locked");
+      document.getElementById("loadingNote").textContent = message;
+      readyForPick = false;
     }
 
-    function setBattleDisabled(disabled, message = "") {
-      document.getElementById("choiceA").classList.toggle("disabled", disabled);
-      document.getElementById("choiceB").classList.toggle("disabled", disabled);
+    function unlockChoices(message = "") {
+      document.getElementById("choiceA").classList.remove("locked");
+      document.getElementById("choiceB").classList.remove("locked");
       document.getElementById("loadingNote").textContent = message;
+      readyForPick = true;
+      isAdvancing = false;
+    }
+
+    function loadImage(img, url) {
+      return new Promise(resolve => {
+        let done = false;
+
+        const finish = () => {
+          if (done) return;
+          done = true;
+          img.classList.add("loaded");
+          resolve();
+        };
+
+        img.classList.remove("loaded");
+
+        const timeout = setTimeout(() => {
+          finish();
+        }, 3500);
+
+        img.onload = () => {
+          clearTimeout(timeout);
+          finish();
+        };
+
+        img.onerror = () => {
+          clearTimeout(timeout);
+          finish();
+        };
+
+        img.src = url;
+      });
     }
 
     function showExplosion(rate) {
@@ -782,7 +796,7 @@
 
       setTimeout(() => {
         el.classList.remove("show");
-      }, 3000);
+      }, 1800);
     }
 
     function renderLeaderboard(arr) {
@@ -799,14 +813,6 @@
 
         const item = document.createElement("div");
         item.className = "leader-item";
-
-        let accent = "";
-        if (idx === 0) accent = `border-color: rgba(255,215,106,.35); box-shadow: inset 0 0 0 1px rgba(255,215,106,.1);`;
-        if (idx === 1) accent = `border-color: rgba(214,217,224,.25);`;
-        if (idx === 2) accent = `border-color: rgba(216,154,99,.25);`;
-
-        item.style.cssText += accent;
-
         item.innerHTML = `
           <img src="${cat.url}" alt="Ranked cat" loading="lazy">
           <div>
@@ -857,12 +863,14 @@
       const screen = document.getElementById("roundScreen");
       screen.className = "round-screen show " + roundStageClass(nextRoundSize);
 
-      document.getElementById("roundBadge").textContent = "Next Stage";
+      document.getElementById("roundBadge").textContent = nextRoundSize === 2 ? "Final Stage" : "Next Stage";
       document.getElementById("roundScreenTitle").textContent = roundName(nextRoundSize);
       document.getElementById("roundScreenDesc").textContent = roundDescription(nextRoundSize);
 
       document.getElementById("battleArea").style.display = "none";
       document.getElementById("loadingNote").textContent = "";
+      readyForPick = false;
+      isAdvancing = false;
     }
 
     function hideRoundTransition() {
@@ -870,33 +878,39 @@
       document.getElementById("battleArea").style.display = "grid";
     }
 
-    function renderCurrentMatch() {
+    async function renderCurrentMatch() {
       const round = rounds[currentRoundIndex];
 
       if (!round || round.length === 1) {
-        renderWinner(round[0]);
+        await renderWinner(round[0]);
         return;
       }
 
       currentPair = [round[currentMatchIndex], round[currentMatchIndex + 1]];
       hideRoundTransition();
-      loadImage(document.getElementById("catA"), currentPair[0].url);
-      loadImage(document.getElementById("catB"), currentPair[1].url);
+      lockChoices("Loading next matchup...");
+
+      await Promise.all([
+        loadImage(document.getElementById("catA"), currentPair[0].url),
+        loadImage(document.getElementById("catB"), currentPair[1].url)
+      ]);
+
       updateProgress();
-      isAdvancing = false;
-      setBattleDisabled(false, "");
+      unlockChoices("");
     }
 
     function nextMatch(winnerCat) {
-      if (isAdvancing) return;
+      if (!readyForPick || isAdvancing || !currentPair) return;
+
       isAdvancing = true;
+      readyForPick = false;
 
       const loserCat = currentPair[0].id === winnerCat.id ? currentPair[1] : currentPair[0];
       const stat = recordLocalBattle(winnerCat, loserCat);
       const rate = Math.round((stat.w / stat.v) * 100);
 
       showExplosion(rate);
-      setBattleDisabled(true, "Nice pick ✨");
+      lockChoices("Nice pick ✨");
 
       const currentRound = rounds[currentRoundIndex];
       const nextRoundIndex = currentRoundIndex + 1;
@@ -906,9 +920,8 @@
 
       completedMatches += 1;
 
-      setTimeout(() => {
+      setTimeout(async () => {
         currentMatchIndex += 2;
-
         const finishedRound = currentMatchIndex >= currentRound.length;
 
         if (finishedRound) {
@@ -916,26 +929,19 @@
           currentMatchIndex = 0;
 
           const upcomingRound = rounds[currentRoundIndex];
-
           if (upcomingRound && upcomingRound.length > 1) {
             showRoundTransition(upcomingRound.length);
-            isAdvancing = false;
-            setBattleDisabled(false, "");
-
-            if (upcomingRound.length === 2) {
-              document.getElementById("roundBadge").textContent = "Final Stage";
-            }
           } else {
-            renderCurrentMatch();
+            await renderCurrentMatch();
           }
         } else {
-          renderCurrentMatch();
+          await renderCurrentMatch();
         }
-      }, 280);
+      }, 220);
     }
 
     async function submitTournamentResults(championCat) {
-      setBattleDisabled(true, "Saving your tournament result...");
+      document.getElementById("loadingNote").textContent = "Saving your tournament result...";
 
       const slimResults = {};
       for (const [catId, stat] of Object.entries(localStats)) {
@@ -1053,13 +1059,16 @@
           document.getElementById("winnerSub").textContent =
             "Your result has been added to today’s global cat rankings.";
         }
-        setBattleDisabled(false, "Tournament saved 💖");
+        document.getElementById("loadingNote").textContent = "Tournament saved 💖";
       } catch (err) {
         console.error(err);
         document.getElementById("winnerSub").textContent =
           "Could not save your result, but your champion is still glorious.";
-        setBattleDisabled(false, "");
+        document.getElementById("loadingNote").textContent = "";
       }
+
+      readyForPick = false;
+      isAdvancing = false;
     }
 
     async function shareCat(url, text = "Look at this cute cat from LookThatCats!") {
@@ -1086,12 +1095,14 @@
       currentPair = null;
       completedMatches = 0;
       isAdvancing = false;
+      readyForPick = false;
       localStats = {};
 
       document.getElementById("battleArea").style.display = "grid";
       document.getElementById("resultBox").classList.remove("show");
       document.getElementById("roundScreen").className = "round-screen";
-      setBattleDisabled(false, "");
+      document.getElementById("loadingNote").textContent = "";
+      document.getElementById("winnerSub").textContent = "";
 
       renderCurrentMatch();
     }
@@ -1104,8 +1115,8 @@
       if (currentPair) nextMatch(currentPair[1]);
     });
 
-    document.getElementById("continueRoundBtn").addEventListener("click", () => {
-      renderCurrentMatch();
+    document.getElementById("continueRoundBtn").addEventListener("click", async () => {
+      await renderCurrentMatch();
     });
 
     document.getElementById("restartBtn").addEventListener("click", async () => {
