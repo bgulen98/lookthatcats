@@ -1,7 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
 
@@ -11,238 +10,231 @@
 <link href="https://fonts.googleapis.com/css2?family=Pacifico&family=Inter:wght@400;600&display=swap" rel="stylesheet">
 
 <style>
-
 body{
-background:#121212;
-color:white;
-font-family:Inter;
-margin:0;
-text-align:center;
+  background:#121212;
+  color:white;
+  font-family:Inter, Arial, sans-serif;
+  margin:0;
+  text-align:center;
 }
 
 h1{
-font-family:Pacifico;
-color:#ff69b4;
-margin-top:30px;
-font-size:42px;
+  font-family:Pacifico, cursive;
+  color:#ff69b4;
+  margin-top:30px;
+  font-size:42px;
+  font-weight:400;
 }
 
-  <h1>Look That Cats</h1>
-
-<div style="margin:18px 0 8px;">
-  <a href="/tournament.html">
-    <button style="
-    padding:12px 20px;
-    background:#ff69b4;
-    border:none;
-    border-radius:12px;
-    color:white;
-    font-size:16px;
-    ">
-      Play Daily Cat Tournament
-    </button>
-  </a>
-</div>
-  
 .section{
-margin-top:40px;
+  margin-top:40px;
 }
 
 .line{
-width:80%;
-height:1px;
-background:#2a2a2a;
-margin:40px auto;
+  width:80%;
+  height:1px;
+  background:#2a2a2a;
+  margin:40px auto;
 }
 
 .battle{
-display:flex;
-justify-content:center;
-gap:40px;
-margin-top:30px;
-flex-wrap:wrap;
+  display:flex;
+  justify-content:center;
+  gap:40px;
+  margin-top:30px;
+  flex-wrap:wrap;
 }
 
 .cat-card{
-background:#1b1b1b;
-padding:15px;
-border-radius:16px;
-transition:.2s;
-cursor:pointer;
+  background:#1b1b1b;
+  padding:15px;
+  border-radius:16px;
+  transition:.2s;
+  cursor:pointer;
 }
 
 .cat-card:hover{
-transform:scale(1.05);
+  transform:scale(1.03);
 }
 
 .cat-card img{
-width:260px;
-height:260px;
-object-fit:cover;
-border-radius:12px;
+  width:260px;
+  height:260px;
+  object-fit:cover;
+  border-radius:12px;
+  opacity:0;
+  transition:opacity .25s ease;
+  background:#1f1f1f;
+}
+
+.cat-card img.loaded{
+  opacity:1;
 }
 
 .rate-buttons{
-margin-top:20px;
+  margin-top:20px;
 }
 
 .rate-buttons button{
-margin:5px;
-padding:10px 15px;
-border:none;
-border-radius:8px;
-background:#ff69b4;
-color:white;
-cursor:pointer;
+  margin:5px;
+  padding:10px 15px;
+  border:none;
+  border-radius:8px;
+  background:#ff69b4;
+  color:white;
+  cursor:pointer;
 }
 
 .rate-buttons button:hover{
-background:#ff85c4;
+  background:#ff85c4;
 }
 
 .topcats{
-display:flex;
-justify-content:center;
-gap:15px;
-flex-wrap:wrap;
+  display:flex;
+  justify-content:center;
+  gap:15px;
+  flex-wrap:wrap;
+  padding:0 18px;
 }
 
 .topcats img{
-width:120px;
-height:120px;
-border-radius:10px;
-object-fit:cover;
+  width:120px;
+  height:120px;
+  border-radius:10px;
+  object-fit:cover;
 }
 
 .daily img{
-width:200px;
-border-radius:12px;
+  width:200px;
+  border-radius:12px;
 }
 
 button{
-cursor:pointer;
+  cursor:pointer;
 }
 
-</style>
+.tournament-btn{
+  padding:12px 20px;
+  background:linear-gradient(90deg,#ff69b4,#ff95cb);
+  border:none;
+  border-radius:999px;
+  color:#161616;
+  font-size:16px;
+  font-weight:700;
+  box-shadow:0 10px 24px rgba(0,0,0,.22);
+}
 
+@media (max-width:640px){
+  .cat-card img{
+    width:42vw;
+    height:42vw;
+    max-width:260px;
+    max-height:260px;
+  }
+
+  h1{
+    font-size:36px;
+  }
+}
+</style>
 </head>
 
 <body>
 
 <h1>Look That Cats</h1>
 
+<div style="margin:18px 0 8px;">
+  <a href="/tournament.html" style="text-decoration:none;">
+    <button class="tournament-btn">🏆 Play Daily Cat Tournament</button>
+  </a>
+</div>
+
 <div class="section">
+  <h2>Cat vs Cat</h2>
 
-<h2>Cat vs Cat</h2>
+  <div class="battle">
+    <div class="cat-card">
+      <img id="cat1" alt="Cat 1">
+      <div class="rate-buttons">
+        <button onclick="rate(1)">1</button>
+        <button onclick="rate(2)">2</button>
+        <button onclick="rate(3)">3</button>
+        <button onclick="rate(4)">4</button>
+        <button onclick="rate(5)">5</button>
+      </div>
+    </div>
 
-<div class="battle">
-
-<div class="cat-card">
-<img id="cat1">
-<div class="rate-buttons">
-<button onclick="rate(1)">1</button>
-<button onclick="rate(2)">2</button>
-<button onclick="rate(3)">3</button>
-<button onclick="rate(4)">4</button>
-<button onclick="rate(5)">5</button>
-</div>
-</div>
-
-<div class="cat-card">
-<img id="cat2">
-<div class="rate-buttons">
-<button onclick="rate(1)">1</button>
-<button onclick="rate(2)">2</button>
-<button onclick="rate(3)">3</button>
-<button onclick="rate(4)">4</button>
-<button onclick="rate(5)">5</button>
-</div>
-</div>
-
-</div>
-
+    <div class="cat-card">
+      <img id="cat2" alt="Cat 2">
+      <div class="rate-buttons">
+        <button onclick="rate(1)">1</button>
+        <button onclick="rate(2)">2</button>
+        <button onclick="rate(3)">3</button>
+        <button onclick="rate(4)">4</button>
+        <button onclick="rate(5)">5</button>
+      </div>
+    </div>
+  </div>
 </div>
 
 <div class="line"></div>
 
 <div class="section">
-
-<h2>Top 10 Cats</h2>
-
-<div class="topcats" id="topcats"></div>
-
+  <h2>Top 10 Cats</h2>
+  <div class="topcats" id="topcats"></div>
 </div>
 
 <div class="line"></div>
 
 <div class="section daily">
-
-<h2 style="color:#ff69b4;font-family:Pacifico;">Cat Of The Day</h2>
-
-<img id="dailycat">
-
+  <h2 style="color:#ff69b4;font-family:Pacifico,cursive;font-weight:400;">Cat Of The Day</h2>
+  <img id="dailycat" alt="Cat of the day">
 </div>
 
-<div class="line"></div>
-
-
 <script>
+function loadImage(img, url){
+  img.classList.remove("loaded");
+  img.onload = () => img.classList.add("loaded");
+  img.src = url;
+}
 
 async function loadBattle(){
+  const res = await fetch("/api/cats/random");
+  const data = await res.json();
 
-const res=await fetch("/api/cats/random")
-
-const data=await res.json()
-
-document.getElementById("cat1").src=data[0]
-document.getElementById("cat2").src=data[1]
-
+  loadImage(document.getElementById("cat1"), data[0]);
+  loadImage(document.getElementById("cat2"), data[1]);
 }
 
 function rate(){
-
-loadBattle()
-
+  loadBattle();
 }
 
 async function loadTop(){
+  const res = await fetch("/api/cats/top");
+  const data = await res.json();
 
-const res=await fetch("/api/cats/top")
+  const container = document.getElementById("topcats");
+  container.innerHTML = "";
 
-const data=await res.json()
-
-const container=document.getElementById("topcats")
-
-container.innerHTML=""
-
-data.forEach(url=>{
-
-const img=document.createElement("img")
-
-img.src=url
-
-container.appendChild(img)
-
-})
-
+  data.forEach(url => {
+    const img = document.createElement("img");
+    img.src = url;
+    img.loading = "lazy";
+    container.appendChild(img);
+  });
 }
 
 async function loadDaily(){
+  const res = await fetch("/api/cats/daily");
+  const url = await res.json();
 
-const res=await fetch("/api/cats/daily")
-
-const url=await res.json()
-
-document.getElementById("dailycat").src=url
-
+  document.getElementById("dailycat").src = url;
 }
 
-loadBattle()
-
-loadTop()
-
-loadDaily()
-
+loadBattle();
+loadTop();
+loadDaily();
 </script>
 
 </body>
