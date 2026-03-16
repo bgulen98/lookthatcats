@@ -14,17 +14,16 @@
     :root{
       --bg:#121212;
       --panel:#1a1a1a;
-      --panel-2:#202020;
       --text:#f5f5f5;
       --muted:#a8a8a8;
       --line:#2d2d2d;
       --pink:#ff69b4;
       --pink-soft:#ff8cc8;
       --shadow:0 10px 30px rgba(0,0,0,.28);
-      --radius:18px;
     }
 
     *{box-sizing:border-box}
+
     body{
       margin:0;
       background:
@@ -215,7 +214,9 @@
       background:#1f1f1f;
     }
 
-    .cat-choice img.loaded{ opacity:1; }
+    .cat-choice img.loaded{
+      opacity:1;
+    }
 
     .cat-choice .label{
       margin-top:12px;
@@ -289,7 +290,9 @@
       text-align:center;
     }
 
-    .result-box.show{ display:block; }
+    .result-box.show{
+      display:block;
+    }
 
     .winner-title{
       font-family:'Pacifico', cursive;
@@ -334,7 +337,9 @@
       color:#161616;
     }
 
-    .btn-primary:hover{ transform:translateY(-1px); }
+    .btn-primary:hover{
+      transform:translateY(-1px);
+    }
 
     .btn-secondary{
       background:#262626;
@@ -508,7 +513,7 @@
         <div class="leader-list" id="leaderboard"></div>
         <div class="tiny-note">
           The tournament cats change every 24 hours.  
-          Win rate is based on wins / total appearances and stored efficiently.
+          Win rate is based on wins / total appearances and resets daily.
         </div>
       </aside>
     </div>
@@ -520,8 +525,8 @@
     const API = "https://api.thecatapi.com/v1/images/search";
     const KEY = "live_fDX7IYEHhfAbsRlNUYMHWpBRLFjjra8l8ixoHazYl93KLEkPHf5yUuV6OhabAb7R";
 
-    const TOURNAMENT_KEY = "ltc_daily_tournament_v1";
-    const TOURNAMENT_STATS_KEY = "ltc_tournament_stats_v1";
+    const TOURNAMENT_KEY = "ltc_daily_tournament_v2";
+    const TOURNAMENT_STATS_KEY = "ltc_tournament_stats_v2";
 
     let tournamentCats = [];
     let rounds = [];
@@ -535,16 +540,15 @@
       return new Date().toISOString().slice(0, 10);
     }
 
-    function hash(url) {
-      return btoa(url).replace(/=/g, "").slice(0, 12);
-    }
-
     async function getCats(n) {
       const res = await fetch(`${API}?limit=${n}`, {
         headers: { "x-api-key": KEY }
       });
       const data = await res.json();
-      return data.map(x => x.url);
+      return data.map((x, i) => ({
+        id: "",
+        url: x.url
+      }));
     }
 
     async function getDailyTournamentCats() {
@@ -553,17 +557,23 @@
 
       if (saved) {
         const parsed = JSON.parse(saved);
-        if (parsed.date === today && Array.isArray(parsed.urls) && parsed.urls.length === 32) {
-          return parsed.urls;
+        if (parsed.date === today && Array.isArray(parsed.cats) && parsed.cats.length === 32) {
+          return parsed.cats;
         }
       }
 
-      const urls = await getCats(32);
+      const freshCats = await getCats(32);
+      const catsWithIds = freshCats.map((cat, index) => ({
+        id: `cat_${index + 1}`,
+        url: cat.url
+      }));
+
       localStorage.setItem(TOURNAMENT_KEY, JSON.stringify({
         date: today,
-        urls
+        cats: catsWithIds
       }));
-      return urls;
+
+      return catsWithIds;
     }
 
     function getStats() {
@@ -578,37 +588,37 @@
     }
 
     function saveStats(data) {
-      const keys = Object.keys(data).filter(k => k !== "__date");
-      if (keys.length > 120) {
-        delete data[keys[0]];
-      }
       localStorage.setItem(TOURNAMENT_STATS_KEY, JSON.stringify(data));
     }
 
-    function recordTournamentBattle(winUrl, loseUrl) {
+    function recordTournamentBattle(winCat, loseCat) {
       const data = getStats();
 
-      const winId = hash(winUrl);
-      const loseId = hash(loseUrl);
+      if (!data[winCat.id]) {
+        data[winCat.id] = { id: winCat.id, url: winCat.url, w: 0, v: 0 };
+      }
 
-      if (!data[winId]) data[winId] = { w: 0, v: 0, url: winUrl };
-      if (!data[loseId]) data[loseId] = { w: 0, v: 0, url: loseUrl };
+      if (!data[loseCat.id]) {
+        data[loseCat.id] = { id: loseCat.id, url: loseCat.url, w: 0, v: 0 };
+      }
 
-      data[winId].w += 1;
-      data[winId].v += 1;
-      data[loseId].v += 1;
+      data[winCat.id].w += 1;
+      data[winCat.id].v += 1;
+      data[loseCat.id].v += 1;
 
       saveStats(data);
-      return data[winId];
+      return data[winCat.id];
     }
 
     function updateLeaderboard() {
       const data = getStats();
-      let arr = Object.entries(data)
-        .filter(([key]) => key !== "__date")
-        .map(([, value]) => value);
+
+      let arr = Object.keys(data)
+        .filter(key => key !== "__date")
+        .map(key => data[key]);
 
       arr = arr.filter(x => x.v >= 1);
+
       arr.sort((a, b) => {
         const rateA = a.w / a.v;
         const rateB = b.w / b.v;
@@ -662,7 +672,7 @@
       document.getElementById("roundText").textContent = currentRound.length > 2 ? "Pick your cutest cat 💖" : "The crown is close 👑";
 
       const totalMatchesThisRound = Math.max(1, currentRound.length / 2);
-      const currentMatch = Math.min(currentMatchIndex + 1, totalMatchesThisRound);
+      const currentMatch = Math.min(Math.floor(currentMatchIndex / 2) + 1, totalMatchesThisRound);
       document.getElementById("matchLabel").textContent = `Match ${currentMatch} / ${totalMatchesThisRound}`;
     }
 
@@ -691,14 +701,17 @@
       }
 
       currentPair = [round[currentMatchIndex], round[currentMatchIndex + 1]];
-      loadImage(document.getElementById("catA"), currentPair[0]);
-      loadImage(document.getElementById("catB"), currentPair[1]);
+
+      loadImage(document.getElementById("catA"), currentPair[0].url);
+      loadImage(document.getElementById("catB"), currentPair[1].url);
+
       updateProgress();
     }
 
-    function nextMatch(winnerUrl) {
-      const loserUrl = currentPair[0] === winnerUrl ? currentPair[1] : currentPair[0];
-      const stat = recordTournamentBattle(winnerUrl, loserUrl);
+    function nextMatch(winnerCat) {
+      const loserCat = currentPair[0].id === winnerCat.id ? currentPair[1] : currentPair[0];
+
+      const stat = recordTournamentBattle(winnerCat, loserCat);
       const rate = Math.round((stat.w / stat.v) * 100);
 
       updateLeaderboard();
@@ -706,7 +719,7 @@
 
       const nextRoundIndex = currentRoundIndex + 1;
       if (!rounds[nextRoundIndex]) rounds[nextRoundIndex] = [];
-      rounds[nextRoundIndex].push(winnerUrl);
+      rounds[nextRoundIndex].push(winnerCat);
 
       completedMatches += 1;
 
@@ -723,21 +736,20 @@
       }, 450);
     }
 
-    function renderWinner(url) {
+    function renderWinner(cat) {
       document.getElementById("battleArea").style.display = "none";
       document.getElementById("resultBox").classList.add("show");
-      document.getElementById("winnerImg").src = url;
+      document.getElementById("winnerImg").src = cat.url;
 
       const data = getStats();
-      const id = hash(url);
-      const stat = data[id];
+      const stat = data[cat.id];
       const rate = stat ? Math.round((stat.w / stat.v) * 100) : 100;
 
       document.getElementById("winnerMeta").textContent =
         `Your champion finished with a ${rate}% win rate in today’s bracket.`;
 
       const shareBtn = document.getElementById("shareWinnerBtn");
-      shareBtn.onclick = () => shareCat(url, "I just finished today’s cat tournament and crowned this champion!");
+      shareBtn.onclick = () => shareCat(cat.url, "I just finished today’s cat tournament and crowned this champion!");
     }
 
     async function shareCat(url, text = "Look at this cute cat from LookThatCats!") {
@@ -757,14 +769,17 @@
       }
     }
 
-    function startTournament(urls) {
-      tournamentCats = urls.slice();
+    function startTournament(cats) {
+      tournamentCats = cats.slice();
       rounds = [tournamentCats.slice()];
       currentRoundIndex = 0;
       currentMatchIndex = 0;
+      currentPair = null;
       completedMatches = 0;
+
       document.getElementById("battleArea").style.display = "grid";
       document.getElementById("resultBox").classList.remove("show");
+
       renderCurrentMatch();
     }
 
@@ -777,14 +792,16 @@
     });
 
     document.getElementById("restartBtn").addEventListener("click", async () => {
-      const urls = await getDailyTournamentCats();
-      startTournament(urls);
+      const cats = await getDailyTournamentCats();
+      localStorage.removeItem(TOURNAMENT_STATS_KEY);
+      updateLeaderboard();
+      startTournament(cats);
     });
 
     (async function init() {
       updateLeaderboard();
-      const urls = await getDailyTournamentCats();
-      startTournament(urls);
+      const cats = await getDailyTournamentCats();
+      startTournament(cats);
     })();
   </script>
 </body>
