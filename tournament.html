@@ -14,7 +14,6 @@
     :root{
       --bg:#121212;
       --panel:#1a1a1a;
-      --panel-2:#202020;
       --text:#f5f5f5;
       --muted:#a8a8a8;
       --line:#2d2d2d;
@@ -117,6 +116,7 @@
 
     .main-panel{
       padding:22px;
+      min-width:0;
     }
 
     .side-panel{
@@ -162,6 +162,7 @@
       color:var(--muted);
       font-size:14px;
       margin-bottom:8px;
+      flex-wrap:wrap;
     }
 
     .progress-bar{
@@ -183,12 +184,15 @@
 
     .battle-area{
       display:grid;
-      grid-template-columns:1fr 90px 1fr;
+      grid-template-columns:minmax(0,1fr) 90px minmax(0,1fr);
       gap:18px;
       align-items:center;
+      min-width:0;
     }
 
     .cat-choice{
+      min-width:0;
+      width:100%;
       position:relative;
       background:var(--panel);
       border:1px solid #2f2f2f;
@@ -211,6 +215,7 @@
 
     .cat-choice img{
       width:100%;
+      max-width:100%;
       aspect-ratio:1/1;
       object-fit:cover;
       border-radius:16px;
@@ -251,6 +256,7 @@
       color:#ffd6ea;
       margin:0 auto;
       box-shadow:0 10px 20px rgba(0,0,0,.18);
+      flex-shrink:0;
     }
 
     .loading-note{
@@ -439,6 +445,7 @@
       .layout{
         grid-template-columns:1fr;
       }
+
       .side-panel{
         position:static;
       }
@@ -548,6 +555,7 @@
     let completedMatches = 0;
     let tournamentDate = "";
     let isVoting = false;
+    let safetyUnlockTimer = null;
     const TOTAL_MATCHES = 31;
 
     function roundName(size) {
@@ -583,6 +591,15 @@
       document.getElementById("choiceA").classList.toggle("disabled", disabled);
       document.getElementById("choiceB").classList.toggle("disabled", disabled);
       document.getElementById("loadingNote").textContent = message;
+    }
+
+    function unlockBattle(message = "") {
+      if (safetyUnlockTimer) {
+        clearTimeout(safetyUnlockTimer);
+        safetyUnlockTimer = null;
+      }
+      isVoting = false;
+      setBattleDisabled(false, message);
     }
 
     function showExplosion(rate) {
@@ -646,8 +663,7 @@
       loadImage(document.getElementById("catA"), currentPair[0].url);
       loadImage(document.getElementById("catB"), currentPair[1].url);
       updateProgress();
-      setBattleDisabled(false, "");
-      isVoting = false;
+      unlockBattle("");
     }
 
     async function nextMatch(winnerCat) {
@@ -656,11 +672,15 @@
       isVoting = true;
       setBattleDisabled(true, "Saving your pick...");
 
+      safetyUnlockTimer = setTimeout(() => {
+        unlockBattle("Connection issue. Please tap again.");
+      }, 12000);
+
       const loserCat = currentPair[0].id === winnerCat.id ? currentPair[1] : currentPair[0];
 
       try {
         const controller = new AbortController();
-        const timeout = setTimeout(() => controller.abort(), 10000);
+        const timeout = setTimeout(() => controller.abort(), 8000);
 
         const res = await fetch("/api/tournament/vote", {
           method: "POST",
@@ -686,7 +706,7 @@
         const stat = data.winner;
         const rate = Math.round((stat.w / stat.v) * 100);
 
-        await fetchLeaderboard();
+        fetchLeaderboard().catch(() => {});
         showExplosion(rate);
 
         const nextRoundIndex = currentRoundIndex + 1;
@@ -705,14 +725,11 @@
           }
 
           renderCurrentMatch();
-          setBattleDisabled(false, "");
-          isVoting = false;
         }, 450);
 
       } catch (err) {
         console.error(err);
-        setBattleDisabled(false, "Connection issue. Please tap again.");
-        isVoting = false;
+        unlockBattle("Connection issue. Please tap again.");
       }
     }
 
@@ -722,6 +739,7 @@
       document.getElementById("winnerImg").src = cat.url;
       document.getElementById("winnerMeta").textContent =
         `Your champion made it through today’s bracket.`;
+      unlockBattle("");
 
       document.getElementById("shareWinnerBtn").onclick = () => shareCat(
         cat.url,
@@ -752,12 +770,9 @@
       currentMatchIndex = 0;
       currentPair = null;
       completedMatches = 0;
-      isVoting = false;
-
       document.getElementById("battleArea").style.display = "grid";
       document.getElementById("resultBox").classList.remove("show");
-      document.getElementById("loadingNote").textContent = "";
-
+      unlockBattle("");
       renderCurrentMatch();
     }
 
