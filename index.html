@@ -9,11 +9,11 @@
 <title>LookThatCats - Rate Cute Cats</title>
 
 <meta name="description" content="Rate cute cats, discover the Cat of the Day and share adorable cats with friends.">
-<meta name="keywords" content="cats, cute cats, cat rating, cat battle">
 <meta name="theme-color" content="#121212">
 
 <link rel="preconnect" href="https://cdn2.thecatapi.com">
-<link rel="dns-prefetch" href="https://cdn2.thecatapi.com">
+
+<link href="https://fonts.googleapis.com/css2?family=Pacifico&display=swap" rel="stylesheet">
 
 <style>
 
@@ -23,18 +23,27 @@ color:white;
 font-family:Arial;
 text-align:center;
 margin:0;
-padding:0;
 }
 
 h1{
 margin-top:20px;
 }
 
+.section{
+margin-top:40px;
+}
+
+.divider{
+height:1px;
+background:#2a2a2a;
+width:80%;
+margin:40px auto;
+}
+
 .container{
 display:flex;
 justify-content:center;
 gap:30px;
-margin-top:30px;
 flex-wrap:wrap;
 }
 
@@ -83,14 +92,24 @@ right:0;
 background:#222;
 padding:10px;
 border-radius:8px;
+min-width:160px;
 }
 
 .share-menu a{
 display:block;
 color:white;
 text-decoration:none;
-margin:5px 0;
+padding:6px 4px;
+border-bottom:1px solid #333;
 font-size:14px;
+}
+
+.share-menu a:last-child{
+border-bottom:none;
+}
+
+.share-menu a:hover{
+color:#ff69b4;
 }
 
 .vote-buttons button{
@@ -111,7 +130,6 @@ background:#555;
 display:grid;
 grid-template-columns:repeat(auto-fit,minmax(100px,1fr));
 gap:10px;
-margin-top:20px;
 padding:20px;
 }
 
@@ -125,11 +143,26 @@ border-radius:10px;
 #catOfDay img{
 width:200px;
 border-radius:12px;
-margin-top:10px;
+}
+
+.catday-title{
+font-family:'Pacifico', cursive;
+color:#ff69b4;
+font-size:28px;
+}
+
+.vote-effect{
+animation:flash 0.6s ease;
+}
+
+@keyframes flash{
+0%{box-shadow:0 0 0px pink;}
+50%{box-shadow:0 0 25px hotpink;}
+100%{box-shadow:0 0 0px pink;}
 }
 
 footer{
-margin-top:40px;
+margin-top:50px;
 padding:20px;
 font-size:14px;
 color:#aaa;
@@ -137,21 +170,12 @@ color:#aaa;
 
 footer a{
 color:#aaa;
-text-decoration:none;
 margin:0 6px;
+text-decoration:none;
 }
 
 footer a:hover{
 color:white;
-}
-
-@media (max-width:600px){
-
-.cat-card img{
-width:42vw;
-height:42vw;
-}
-
 }
 
 </style>
@@ -162,15 +186,15 @@ height:42vw;
 
 <h1>🐱 LookThatCats</h1>
 
-<h2>Cat of the Day</h2>
+<div class="section">
 
-<div id="catOfDay"></div>
+<h2>Cat VS Cat</h2>
 
 <div class="container">
 
 <div class="cat-card">
 
-<img id="cat1" loading="lazy" decoding="async">
+<img id="cat1" loading="lazy">
 
 <div class="share">
 
@@ -184,7 +208,7 @@ height:42vw;
 
 <div class="cat-card">
 
-<img id="cat2" loading="lazy" decoding="async">
+<img id="cat2" loading="lazy">
 
 <div class="share">
 
@@ -208,9 +232,27 @@ height:42vw;
 
 </div>
 
-<h2>Today's Top Cats</h2>
+</div>
+
+<div class="divider"></div>
+
+<div class="section">
+
+<h2>Top 10 Cats</h2>
 
 <div id="topCats" class="top-cat-grid"></div>
+
+</div>
+
+<div class="divider"></div>
+
+<div class="section">
+
+<h2 class="catday-title">Cat of the Day</h2>
+
+<div id="catOfDay"></div>
+
+</div>
 
 <footer>
 
@@ -268,9 +310,9 @@ document.querySelectorAll(".cat-card img").forEach(img=>{
 
 img.onclick=()=>{
 
-document.querySelectorAll(".cat-card").forEach(c=>c.classList.remove("selected"))
+document.querySelectorAll(".cat-card img").forEach(c=>c.classList.remove("selected"))
 
-img.parentElement.classList.add("selected")
+img.classList.add("selected")
 
 selected=img
 
@@ -285,16 +327,19 @@ buildShare(img)
 function vote(score){
 
 if(!selected){
-
 alert("Select a cat first")
-
 return
-
 }
 
-selected=null
+selected.classList.add("vote-effect")
 
+setTimeout(()=>{
+
+selected.classList.remove("vote-effect")
+selected=null
 loadBattle()
+
+},600)
 
 }
 
@@ -309,20 +354,20 @@ menu.style.display=menu.style.display==="block"?"none":"block"
 function buildShare(img){
 
 let url=img.src
-
 let page=location.href
-
 let text="Look at this cute cat!"
 
 let menu=img.parentElement.querySelector(".share-menu")
 
 menu.innerHTML=`
 
-<a href="https://www.facebook.com/sharer/sharer.php?u=${page}" target="_blank">Facebook</a>
+<a href="https://www.facebook.com/sharer/sharer.php?u=${url}" target="_blank">Facebook</a>
 
-<a href="https://twitter.com/intent/tweet?text=${text}&url=${page}" target="_blank">X</a>
+<a href="https://twitter.com/intent/tweet?text=${text}&url=${url}" target="_blank">X</a>
 
-<a href="https://reddit.com/submit?url=${page}&title=${text}" target="_blank">Reddit</a>
+<a href="https://reddit.com/submit?url=${url}&title=${text}" target="_blank">Reddit</a>
+
+<a href="https://wa.me/?text=${text}%20${url}" target="_blank">WhatsApp</a>
 
 <a href="${url}" download>Download for Instagram Story</a>
 
@@ -332,48 +377,17 @@ menu.innerHTML=`
 
 async function loadTopCats(){
 
-let today=new Date().toISOString().slice(0,10)
-
-let saved=localStorage.getItem("topcats")
-
-if(saved){
-
-let data=JSON.parse(saved)
-
-if(data.date===today){
-
-renderTop(data.urls)
-
-return
-
-}
-
-}
-
 let urls=await getCats(10)
-
-localStorage.setItem("topcats",JSON.stringify({date:today,urls}))
-
-renderTop(urls)
-
-}
-
-function renderTop(list){
 
 let c=document.getElementById("topCats")
 
 c.innerHTML=""
 
-list.forEach(u=>{
-
+urls.forEach(u=>{
 let i=document.createElement("img")
-
 i.src=u
-
 i.loading="lazy"
-
 c.appendChild(i)
-
 })
 
 }
