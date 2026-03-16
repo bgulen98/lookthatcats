@@ -1,193 +1,423 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
+
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>LookThatCats</title>
+
+<title>LookThatCats - Rate Cute Cats</title>
+
+<meta name="description" content="Rate cute cats, discover the Cat of the Day and share adorable cats with friends.">
+<meta name="keywords" content="cats, cute cats, cat rating, cat battle">
+<meta name="theme-color" content="#121212">
+
+<link rel="preconnect" href="https://cdn2.thecatapi.com">
+<link rel="dns-prefetch" href="https://cdn2.thecatapi.com">
+
 <style>
-  body {
-    background-color: #121212;
-    color: #eee;
-    font-family: 'Arial', sans-serif;
-    margin: 0;
-    padding: 0;
-    text-align: center;
-  }
-  h1 { margin: 20px; }
-  .container {
-    display: flex;
-    justify-content: center;
-    gap: 20px;
-    flex-wrap: wrap;
-    margin-bottom: 20px;
-  }
-  .container img {
-    width: 200px;
-    height: 200px;
-    object-fit: cover;
-    border-radius: 10px;
-    transition: transform 0.3s, border 0.3s;
-    cursor: pointer;
-  }
-  .container img.selected {
-    border: 5px solid pink;
-  }
-  .vote-buttons button {
-    margin: 0 5px;
-    padding: 5px 10px;
-    background-color: #1f1f1f;
-    color: #eee;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-  }
-  .vote-buttons button:hover {
-    background-color: #333;
-  }
-  #topCatsContainer { margin-top: 40px; }
-  #topCatsContainer h2 { margin-bottom: 10px; }
-  .top-cat-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit,minmax(120px,1fr));
-    gap: 15px;
-    justify-items: center;
-  }
-  .top-cat-grid img {
-    width: 100px;
-    height: 100px;
-    object-fit: cover;
-    border-radius: 10px;
-    transition: transform 0.3s;
-  }
-  .top-cat-grid img:hover { transform: scale(1.1); }
-  /* Banner alanları */
-  #left-ad, #right-ad {
-    position: fixed;
-    top: 100px;
-    width: 120px;
-    height: 600px;
-    background-color: #222;
-    color: #aaa;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-  #left-ad { left: 0; }
-  #right-ad { right: 0; }
-  #bottom-ad {
-    width: 100%;
-    height: 90px;
-    background-color: #222;
-    color: #aaa;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    position: fixed;
-    bottom: 0;
-  }
+
+body{
+background:#121212;
+color:white;
+font-family:Arial;
+text-align:center;
+margin:0;
+padding:0;
+}
+
+h1{
+margin-top:20px;
+}
+
+.container{
+display:flex;
+justify-content:center;
+gap:30px;
+margin-top:30px;
+flex-wrap:wrap;
+}
+
+.cat-card{
+position:relative;
+}
+
+.cat-card img{
+width:220px;
+height:220px;
+object-fit:cover;
+border-radius:12px;
+cursor:pointer;
+transition:0.2s;
+}
+
+.cat-card img.selected{
+border:4px solid hotpink;
+}
+
+.share{
+position:absolute;
+top:8px;
+right:8px;
+display:none;
+}
+
+.cat-card.selected .share{
+display:block;
+}
+
+.share button{
+background:#000;
+color:white;
+border:none;
+padding:6px;
+border-radius:6px;
+cursor:pointer;
+}
+
+.share-menu{
+display:none;
+position:absolute;
+top:35px;
+right:0;
+background:#222;
+padding:10px;
+border-radius:8px;
+}
+
+.share-menu a{
+display:block;
+color:white;
+text-decoration:none;
+margin:5px 0;
+font-size:14px;
+}
+
+.vote-buttons button{
+margin:5px;
+padding:8px 12px;
+border:none;
+background:#333;
+color:white;
+border-radius:6px;
+cursor:pointer;
+}
+
+.vote-buttons button:hover{
+background:#555;
+}
+
+.top-cat-grid{
+display:grid;
+grid-template-columns:repeat(auto-fit,minmax(100px,1fr));
+gap:10px;
+margin-top:20px;
+padding:20px;
+}
+
+.top-cat-grid img{
+width:100px;
+height:100px;
+object-fit:cover;
+border-radius:10px;
+}
+
+#catOfDay img{
+width:200px;
+border-radius:12px;
+margin-top:10px;
+}
+
+footer{
+margin-top:40px;
+padding:20px;
+font-size:14px;
+color:#aaa;
+}
+
+footer a{
+color:#aaa;
+text-decoration:none;
+margin:0 6px;
+}
+
+footer a:hover{
+color:white;
+}
+
+@media (max-width:600px){
+
+.cat-card img{
+width:42vw;
+height:42vw;
+}
+
+}
+
 </style>
+
 </head>
+
 <body>
 
-<div id="left-ad">Left Banner</div>
-<div id="right-ad">Right Banner</div>
+<h1>🐱 LookThatCats</h1>
 
-<h1>LookThatCats 🐱</h1>
+<h2>Cat of the Day</h2>
+
+<div id="catOfDay"></div>
 
 <div class="container">
-  <img id="cat1" src="" alt="Cat 1" loading="lazy">
-  <img id="cat2" src="" alt="Cat 2" loading="lazy">
+
+<div class="cat-card">
+
+<img id="cat1" loading="lazy" decoding="async">
+
+<div class="share">
+
+<button onclick="toggleShare(this)">Share</button>
+
+<div class="share-menu"></div>
+
+</div>
+
+</div>
+
+<div class="cat-card">
+
+<img id="cat2" loading="lazy" decoding="async">
+
+<div class="share">
+
+<button onclick="toggleShare(this)">Share</button>
+
+<div class="share-menu"></div>
+
+</div>
+
+</div>
+
 </div>
 
 <div class="vote-buttons">
-  <button data-score="1">1</button>
-  <button data-score="2">2</button>
-  <button data-score="3">3</button>
-  <button data-score="4">4</button>
-  <button data-score="5">5</button>
+
+<button onclick="vote(1)">1</button>
+<button onclick="vote(2)">2</button>
+<button onclick="vote(3)">3</button>
+<button onclick="vote(4)">4</button>
+<button onclick="vote(5)">5</button>
+
 </div>
 
-<div id="topCatsContainer">
-  <h2>Today's Top Cats</h2>
-  <div id="topCats" class="top-cat-grid"></div>
-</div>
+<h2>Today's Top Cats</h2>
 
-<div id="bottom-ad">Bottom Banner</div>
+<div id="topCats" class="top-cat-grid"></div>
+
+<footer>
+
+<a href="/about.html">About</a> |
+<a href="/privacy.html">Privacy Policy</a> |
+<a href="/terms.html">Terms</a> |
+<a href="/contact.html">Contact</a>
+
+</footer>
 
 <script>
-const API_KEY = "live_fDX7IYEHhfAbsRlNUYMHWpBRLFjjra8l8ixoHazYl93KLEkPHf5yUuV6OhabAb7R";
 
-// Battle kedileri önbelleği
-let battlePool = [];
-let selectedCat = null;
+const API="https://api.thecatapi.com/v1/images/search"
+const KEY="live_fDX7IYEHhfAbsRlNUYMHWpBRLFjjra8l8ixoHazYl93KLEkPHf5yUuV6OhabAb7R"
 
-// Kediyi seç
-document.querySelectorAll('#cat1, #cat2').forEach(img => {
-  img.addEventListener('click', () => {
-    if (selectedCat) selectedCat.classList.remove('selected');
-    img.classList.add('selected');
-    selectedCat = img;
-  });
-});
+let selected=null
+let pool=[]
 
-// Puanlama butonları
-document.querySelectorAll('.vote-buttons button').forEach(btn => {
-  btn.addEventListener('click', async () => {
-    if (!selectedCat) return alert("Select a cat first!");
-    const score = btn.dataset.score;
-    alert(`You gave ${score} points to the selected cat!`);
-    selectedCat.classList.remove('selected');
-    selectedCat = null;
-    await loadBattleCats();
-  });
-});
+async function getCats(n){
 
-// Battle kedilerini yükleme
-async function preloadBattleCats() {
-  if (battlePool.length >= 10) return;
-  const res = await fetch("https://api.thecatapi.com/v1/images/search?limit=20", {
-    headers: {'x-api-key': API_KEY}
-  });
-  const data = await res.json();
-  battlePool = data.map(d => d.url);
+let r=await fetch(API+"?limit="+n,{headers:{'x-api-key':KEY}})
+let j=await r.json()
+
+return j.map(x=>x.url)
+
 }
 
-async function loadBattleCats() {
-  await preloadBattleCats();
-  const idx1 = Math.floor(Math.random() * battlePool.length);
-  let idx2;
-  do { idx2 = Math.floor(Math.random() * battlePool.length); } while(idx2 === idx1);
-  document.getElementById("cat1").src = battlePool[idx1];
-  document.getElementById("cat2").src = battlePool[idx2];
+async function preload(){
+
+if(pool.length<20){
+
+pool=await getCats(30)
+
 }
 
-// Top 10 kediyi 24 saatte bir yenile
-async function loadTopCats() {
-  const today = new Date().toISOString().slice(0,10);
-  let saved = JSON.parse(localStorage.getItem("topCatsData"));
-  if (!saved || saved.date !== today) {
-    const topPromises = Array.from({length:10},()=> 
-      fetch("https://api.thecatapi.com/v1/images/search", {headers:{'x-api-key': API_KEY}})
-        .then(res => res.json())
-        .then(data => data[0].url)
-    );
-    const topCats = await Promise.all(topPromises);
-    localStorage.setItem("topCatsData", JSON.stringify({date: today, urls: topCats}));
-    saved = {date: today, urls: topCats};
-  }
-  const container = document.getElementById("topCats");
-  container.innerHTML = "";
-  saved.urls.forEach(url=>{
-    const img = document.createElement("img");
-    img.src = url;
-    img.loading = "lazy";
-    container.appendChild(img);
-  });
 }
 
-// Başlangıçta yükle
-loadBattleCats();
-loadTopCats();
+async function loadBattle(){
+
+await preload()
+
+let a=Math.floor(Math.random()*pool.length)
+let b=Math.floor(Math.random()*pool.length)
+
+document.getElementById("cat1").src=pool[a]
+document.getElementById("cat2").src=pool[b]
+
+setupImages()
+
+}
+
+function setupImages(){
+
+document.querySelectorAll(".cat-card img").forEach(img=>{
+
+img.onclick=()=>{
+
+document.querySelectorAll(".cat-card").forEach(c=>c.classList.remove("selected"))
+
+img.parentElement.classList.add("selected")
+
+selected=img
+
+buildShare(img)
+
+}
+
+})
+
+}
+
+function vote(score){
+
+if(!selected){
+
+alert("Select a cat first")
+
+return
+
+}
+
+selected=null
+
+loadBattle()
+
+}
+
+function toggleShare(btn){
+
+let menu=btn.nextElementSibling
+
+menu.style.display=menu.style.display==="block"?"none":"block"
+
+}
+
+function buildShare(img){
+
+let url=img.src
+
+let page=location.href
+
+let text="Look at this cute cat!"
+
+let menu=img.parentElement.querySelector(".share-menu")
+
+menu.innerHTML=`
+
+<a href="https://www.facebook.com/sharer/sharer.php?u=${page}" target="_blank">Facebook</a>
+
+<a href="https://twitter.com/intent/tweet?text=${text}&url=${page}" target="_blank">X</a>
+
+<a href="https://reddit.com/submit?url=${page}&title=${text}" target="_blank">Reddit</a>
+
+<a href="${url}" download>Download for Instagram Story</a>
+
+`
+
+}
+
+async function loadTopCats(){
+
+let today=new Date().toISOString().slice(0,10)
+
+let saved=localStorage.getItem("topcats")
+
+if(saved){
+
+let data=JSON.parse(saved)
+
+if(data.date===today){
+
+renderTop(data.urls)
+
+return
+
+}
+
+}
+
+let urls=await getCats(10)
+
+localStorage.setItem("topcats",JSON.stringify({date:today,urls}))
+
+renderTop(urls)
+
+}
+
+function renderTop(list){
+
+let c=document.getElementById("topCats")
+
+c.innerHTML=""
+
+list.forEach(u=>{
+
+let i=document.createElement("img")
+
+i.src=u
+
+i.loading="lazy"
+
+c.appendChild(i)
+
+})
+
+}
+
+async function loadCatOfDay(){
+
+let today=new Date().toISOString().slice(0,10)
+
+let saved=localStorage.getItem("catday")
+
+if(saved){
+
+let data=JSON.parse(saved)
+
+if(data.date===today){
+
+renderCatDay(data.url)
+
+return
+
+}
+
+}
+
+let u=(await getCats(1))[0]
+
+localStorage.setItem("catday",JSON.stringify({date:today,url:u}))
+
+renderCatDay(u)
+
+}
+
+function renderCatDay(u){
+
+let c=document.getElementById("catOfDay")
+
+c.innerHTML=`<img src="${u}" loading="lazy">`
+
+}
+
+loadBattle()
+loadTopCats()
+loadCatOfDay()
+
 </script>
 
 </body>
