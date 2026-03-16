@@ -4,18 +4,23 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Daily Cat Tournament - LookThatCats</title>
-  <meta name="description" content="Play the daily cat tournament and choose the cutest cat. Vote through 32 cats and crown the internet's favorite kitty." />
+  <meta name="description" content="Play the daily 32-cat tournament and crown today’s cutest cat.">
+  <meta name="keywords" content="daily cat tournament, cutest cat bracket, cat voting, cat game, cute cat contest">
+  <meta name="robots" content="index,follow">
+  <meta name="theme-color" content="#121212">
 
-  <meta name="keywords" content="cute cats, cat tournament, daily cat game, funny cats, cat voting game, internet cats" />
+  <meta property="og:title" content="Daily Cat Tournament - LookThatCats">
+  <meta property="og:description" content="Choose your way through a 32-cat bracket and crown today’s champion.">
+  <meta property="og:type" content="website">
+  <meta property="og:image" content="/pink-cat-logo.svg">
+  <meta property="og:url" content="https://www.lookthatcats.vip/tournament.html">
 
-  <meta name="robots" content="index, follow">
-  
-  <meta name="description" content="Play the Daily Cat Tournament and pick the cutest cat through a 32-cat bracket." />
-  <meta name="theme-color" content="#121212" />
   <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="Daily Cat Tournament 🐱">
-  <meta name="twitter:description" content="Vote the cutest cat on the internet.">
+  <meta name="twitter:title" content="Daily Cat Tournament - LookThatCats">
+  <meta name="twitter:description" content="Choose your way through a 32-cat bracket and crown today’s champion.">
   <meta name="twitter:image" content="/pink-cat-logo.svg">
+
+  <link rel="icon" type="image/svg+xml" href="/pink-cat-logo.svg?v=2">
   <link rel="preconnect" href="https://cdn2.thecatapi.com" />
   <link rel="dns-prefetch" href="https://cdn2.thecatapi.com" />
   <link href="https://fonts.googleapis.com/css2?family=Pacifico&family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet" />
@@ -310,11 +315,6 @@
       background:#1b1b1b;
       border:1px solid #2b2b2b;
     }
-    
-    .leader-rank{
-      font-size:22px;
-      font-weight:700;
-    }
 
     .leader-item img{
       width:64px;
@@ -325,9 +325,8 @@
     }
 
     .leader-rank{
-      color:#ffd7ea;
-      font-weight:800;
-      font-size:14px;
+      font-size:22px;
+      font-weight:700;
       margin-bottom:4px;
     }
 
@@ -579,14 +578,33 @@
       z-index:1;
     }
 
-    .stage-quarter .round-title{ color:#ff9dd0; }
-    .stage-semi .round-title{
-      color:#ffd8ee;
-      text-shadow:0 0 16px rgba(255,105,180,.16);
+    .footer{
+      margin-top:60px;
+      padding:30px 20px;
+      text-align:center;
+      color:#888;
+      font-size:14px;
     }
-    .stage-final .round-title{
-      color:var(--gold);
-      text-shadow:0 0 18px rgba(255,215,106,.18);
+
+    .footer-links{
+      display:flex;
+      justify-content:center;
+      gap:18px;
+      flex-wrap:wrap;
+      margin-bottom:12px;
+    }
+
+    .footer-links a{
+      color:#aaa;
+      text-decoration:none;
+    }
+
+    .footer-links a:hover{
+      color:#fff;
+    }
+
+    .footer-copy{
+      color:#777;
     }
 
     @media (max-width: 980px){
@@ -618,16 +636,6 @@
         height:280px;
       }
     }
-
-    
-     .footer{
-       margin-top:60px;
-       padding:30px;
-       text-align:center;
-       color:#888;
-      font-size:14px;
-    }
-    
   </style>
 </head>
 <body>
@@ -714,6 +722,16 @@
         </div>
       </aside>
     </div>
+
+    <footer class="footer">
+      <div class="footer-links">
+        <a href="/about.html">About</a>
+        <a href="/privacy.html">Privacy</a>
+        <a href="/terms.html">Terms</a>
+        <a href="/contact.html">Contact</a>
+      </div>
+      <div class="footer-copy">© 2026 LookThatCats • Daily Cat Tournament</div>
+    </footer>
   </div>
 
   <div class="explosion" id="explosion"></div>
@@ -737,13 +755,6 @@
       if (size === 4) return "Semi Finals";
       if (size === 2) return "Grand Final";
       return "Tournament";
-    }
-
-    function roundStageClass(size) {
-      if (size === 8) return "stage-quarter";
-      if (size === 4) return "stage-semi";
-      if (size === 2) return "stage-final";
-      return "";
     }
 
     function roundDescription(size) {
@@ -834,13 +845,12 @@
       }
 
       arr.forEach((cat, idx) => {
-        let medal = "#" + (idx + 1);
-
-        if(idx === 0) medal = "🥇";
-        if(idx === 1) medal = "🥈";
-        if(idx === 2) medal = "🥉";
-        
         const rate = Math.round((cat.w / cat.v) * 100);
+
+        let medal = "#" + (idx + 1);
+        if (idx === 0) medal = "🥇";
+        if (idx === 1) medal = "🥈";
+        if (idx === 2) medal = "🥉";
 
         const item = document.createElement("div");
         item.className = "leader-item";
@@ -891,9 +901,7 @@
     }
 
     function showRoundTransition(nextRoundSize) {
-      const screen = document.getElementById("roundScreen");
-      screen.className = "round-screen show " + roundStageClass(nextRoundSize);
-
+      document.getElementById("roundScreen").className = "round-screen show";
       document.getElementById("roundBadge").textContent = nextRoundSize === 2 ? "Final Stage" : "Next Stage";
       document.getElementById("roundScreenTitle").textContent = roundName(nextRoundSize);
       document.getElementById("roundScreenDesc").textContent = roundDescription(nextRoundSize);
@@ -1162,10 +1170,5 @@
       await fetchLeaderboard();
     })();
   </script>
-
-    <footer class="footer">
-© 2026 LookThatCats • Daily Cat Tournament
-    </footer>
-  
 </body>
 </html>
