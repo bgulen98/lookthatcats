@@ -1,0 +1,791 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Daily Cat Tournament - LookThatCats</title>
+  <meta name="description" content="Play the Daily Cat Tournament and pick the cutest cat through a 32-cat bracket." />
+  <meta name="theme-color" content="#121212" />
+  <link rel="preconnect" href="https://cdn2.thecatapi.com" />
+  <link rel="dns-prefetch" href="https://cdn2.thecatapi.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Pacifico&family=Inter:wght@400;600;700&display=swap" rel="stylesheet" />
+
+  <style>
+    :root{
+      --bg:#121212;
+      --panel:#1a1a1a;
+      --panel-2:#202020;
+      --text:#f5f5f5;
+      --muted:#a8a8a8;
+      --line:#2d2d2d;
+      --pink:#ff69b4;
+      --pink-soft:#ff8cc8;
+      --shadow:0 10px 30px rgba(0,0,0,.28);
+      --radius:18px;
+    }
+
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      background:
+        radial-gradient(circle at top, rgba(255,105,180,.08), transparent 28%),
+        linear-gradient(180deg, #141414 0%, #111111 100%);
+      color:var(--text);
+      font-family:'Inter', Arial, sans-serif;
+    }
+
+    .page{
+      max-width:1280px;
+      margin:0 auto;
+      padding:22px 18px 50px;
+    }
+
+    .topbar{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:16px;
+      margin-bottom:18px;
+      flex-wrap:wrap;
+    }
+
+    .back-home{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      text-decoration:none;
+      color:white;
+      background:#1f1f1f;
+      border:1px solid #303030;
+      padding:10px 14px;
+      border-radius:999px;
+      transition:.2s ease;
+      box-shadow:var(--shadow);
+    }
+
+    .back-home:hover{
+      transform:translateY(-1px);
+      border-color:#444;
+      background:#252525;
+    }
+
+    .title-wrap{
+      text-align:center;
+      flex:1;
+      min-width:240px;
+    }
+
+    .kicker{
+      color:var(--pink-soft);
+      font-size:13px;
+      letter-spacing:.16em;
+      text-transform:uppercase;
+      margin-bottom:6px;
+    }
+
+    h1{
+      margin:0;
+      font-size:clamp(30px, 5vw, 52px);
+      line-height:1.05;
+      font-family:'Pacifico', cursive;
+      color:var(--pink);
+      font-weight:400;
+    }
+
+    .subtitle{
+      margin-top:10px;
+      color:var(--muted);
+      font-size:15px;
+    }
+
+    .layout{
+      display:grid;
+      grid-template-columns:minmax(0,1fr) 320px;
+      gap:24px;
+      align-items:start;
+      margin-top:22px;
+    }
+
+    .main-panel,
+    .side-panel{
+      background:linear-gradient(180deg, rgba(255,255,255,.02), rgba(255,255,255,.01));
+      border:1px solid var(--line);
+      border-radius:24px;
+      box-shadow:var(--shadow);
+      backdrop-filter:blur(8px);
+    }
+
+    .main-panel{
+      padding:22px;
+    }
+
+    .side-panel{
+      padding:18px;
+      position:sticky;
+      top:16px;
+    }
+
+    .panel-head{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:12px;
+      margin-bottom:14px;
+      flex-wrap:wrap;
+    }
+
+    .panel-title{
+      font-size:22px;
+      font-weight:700;
+      margin:0;
+    }
+
+    .tag{
+      padding:8px 12px;
+      border-radius:999px;
+      background:rgba(255,105,180,.12);
+      color:#ffd2e8;
+      border:1px solid rgba(255,105,180,.2);
+      font-size:13px;
+      white-space:nowrap;
+    }
+
+    .progress-wrap{
+      margin:10px 0 22px;
+    }
+
+    .progress-top{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:12px;
+      color:var(--muted);
+      font-size:14px;
+      margin-bottom:8px;
+    }
+
+    .progress-bar{
+      width:100%;
+      height:12px;
+      background:#252525;
+      border-radius:999px;
+      overflow:hidden;
+      border:1px solid #303030;
+    }
+
+    .progress-fill{
+      height:100%;
+      width:0%;
+      background:linear-gradient(90deg, #ff69b4, #ff9dd0);
+      border-radius:999px;
+      transition:width .35s ease;
+    }
+
+    .battle-area{
+      display:grid;
+      grid-template-columns:1fr 90px 1fr;
+      gap:18px;
+      align-items:center;
+    }
+
+    .cat-choice{
+      position:relative;
+      background:var(--panel);
+      border:1px solid #2f2f2f;
+      border-radius:22px;
+      padding:14px;
+      cursor:pointer;
+      transition:transform .18s ease, border-color .18s ease, box-shadow .18s ease;
+    }
+
+    .cat-choice:hover{
+      transform:translateY(-2px);
+      border-color:#4b4b4b;
+      box-shadow:0 12px 28px rgba(0,0,0,.3);
+    }
+
+    .cat-choice img{
+      width:100%;
+      aspect-ratio:1/1;
+      object-fit:cover;
+      border-radius:16px;
+      display:block;
+      opacity:0;
+      transition:opacity .25s ease;
+      background:#1f1f1f;
+    }
+
+    .cat-choice img.loaded{ opacity:1; }
+
+    .cat-choice .label{
+      margin-top:12px;
+      font-weight:700;
+      font-size:15px;
+      color:#ffd7ea;
+    }
+
+    .cat-choice .hint{
+      margin-top:6px;
+      color:var(--muted);
+      font-size:13px;
+    }
+
+    .vs-pill{
+      width:90px;
+      height:90px;
+      border-radius:999px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      background:radial-gradient(circle at top, rgba(255,105,180,.18), rgba(255,105,180,.03));
+      border:1px solid rgba(255,105,180,.25);
+      font-weight:800;
+      letter-spacing:.08em;
+      color:#ffd6ea;
+      margin:0 auto;
+      box-shadow:0 10px 20px rgba(0,0,0,.18);
+    }
+
+    .explosion{
+      position:fixed;
+      left:50%;
+      top:44%;
+      transform:translate(-50%,-50%) scale(.92);
+      padding:18px 24px;
+      border-radius:18px;
+      background:rgba(26,26,26,.96);
+      border:1px solid rgba(255,105,180,.35);
+      color:#fff;
+      font-weight:800;
+      font-size:clamp(24px,4vw,40px);
+      box-shadow:0 18px 40px rgba(0,0,0,.35);
+      opacity:0;
+      pointer-events:none;
+      z-index:999;
+      transition:opacity .2s ease, transform .2s ease;
+      text-align:center;
+    }
+
+    .explosion.show{
+      opacity:1;
+      transform:translate(-50%,-50%) scale(1);
+    }
+
+    .explosion small{
+      display:block;
+      font-size:14px;
+      color:#ffd5e9;
+      margin-top:8px;
+      font-weight:600;
+    }
+
+    .result-box{
+      display:none;
+      margin-top:22px;
+      padding:20px;
+      background:var(--panel);
+      border:1px solid #303030;
+      border-radius:22px;
+      text-align:center;
+    }
+
+    .result-box.show{ display:block; }
+
+    .winner-title{
+      font-family:'Pacifico', cursive;
+      color:var(--pink);
+      font-size:34px;
+      margin:0 0 12px;
+    }
+
+    .winner-img{
+      width:min(320px, 100%);
+      aspect-ratio:1/1;
+      object-fit:cover;
+      border-radius:18px;
+      display:block;
+      margin:0 auto 14px;
+    }
+
+    .winner-meta{
+      color:var(--muted);
+      font-size:15px;
+      margin-bottom:14px;
+    }
+
+    .result-actions{
+      display:flex;
+      justify-content:center;
+      gap:12px;
+      flex-wrap:wrap;
+    }
+
+    .btn{
+      border:none;
+      border-radius:999px;
+      padding:12px 18px;
+      cursor:pointer;
+      font-weight:700;
+      transition:.18s ease;
+    }
+
+    .btn-primary{
+      background:linear-gradient(90deg, #ff69b4, #ff93c8);
+      color:#161616;
+    }
+
+    .btn-primary:hover{ transform:translateY(-1px); }
+
+    .btn-secondary{
+      background:#262626;
+      color:#fff;
+      border:1px solid #343434;
+    }
+
+    .btn-secondary:hover{
+      background:#2d2d2d;
+      transform:translateY(-1px);
+    }
+
+    .leader-title{
+      margin:0 0 12px;
+      font-size:20px;
+    }
+
+    .leader-sub{
+      color:var(--muted);
+      font-size:13px;
+      margin-bottom:14px;
+    }
+
+    .leader-list{
+      display:flex;
+      flex-direction:column;
+      gap:10px;
+    }
+
+    .leader-item{
+      display:grid;
+      grid-template-columns:64px 1fr;
+      gap:12px;
+      align-items:center;
+      padding:10px;
+      border-radius:16px;
+      background:#1b1b1b;
+      border:1px solid #2b2b2b;
+    }
+
+    .leader-item img{
+      width:64px;
+      height:64px;
+      object-fit:cover;
+      border-radius:12px;
+      display:block;
+    }
+
+    .leader-rank{
+      color:#ffd7ea;
+      font-weight:800;
+      font-size:14px;
+      margin-bottom:4px;
+    }
+
+    .leader-rate{
+      color:var(--pink-soft);
+      font-weight:700;
+      font-size:14px;
+      margin-bottom:4px;
+    }
+
+    .leader-votes{
+      color:var(--muted);
+      font-size:12px;
+    }
+
+    .empty-state{
+      color:var(--muted);
+      font-size:14px;
+      line-height:1.5;
+      padding:14px 0 6px;
+    }
+
+    .tiny-note{
+      margin-top:16px;
+      color:#878787;
+      font-size:12px;
+      line-height:1.5;
+    }
+
+    @media (max-width: 980px){
+      .layout{
+        grid-template-columns:1fr;
+      }
+      .side-panel{
+        position:static;
+      }
+    }
+
+    @media (max-width: 720px){
+      .battle-area{
+        grid-template-columns:1fr;
+        gap:14px;
+      }
+      .vs-pill{
+        width:72px;
+        height:72px;
+      }
+      .main-panel{
+        padding:16px;
+      }
+      .panel-title{
+        font-size:20px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <div class="topbar">
+      <a class="back-home" href="/index.html">← Back to Home</a>
+
+      <div class="title-wrap">
+        <div class="kicker">Daily game</div>
+        <h1>Daily Cat Tournament</h1>
+        <div class="subtitle">Choose your way through a 32-cat bracket and crown today’s champion.</div>
+      </div>
+
+      <div class="tag">32 Cats • 5 Rounds • 1 Winner</div>
+    </div>
+
+    <div class="layout">
+      <section class="main-panel">
+        <div class="panel-head">
+          <h2 class="panel-title" id="roundLabel">Round of 32</h2>
+          <div class="tag" id="matchLabel">Match 1 / 16</div>
+        </div>
+
+        <div class="progress-wrap">
+          <div class="progress-top">
+            <span id="progressText">0 / 31 picks completed</span>
+            <span id="roundText">Have fun 💖</span>
+          </div>
+          <div class="progress-bar">
+            <div class="progress-fill" id="progressFill"></div>
+          </div>
+        </div>
+
+        <div class="battle-area" id="battleArea">
+          <div class="cat-choice" id="choiceA">
+            <img id="catA" alt="Tournament cat A">
+            <div class="label">Pick me!</div>
+            <div class="hint">Tap to advance this cutie</div>
+          </div>
+
+          <div class="vs-pill">VS</div>
+
+          <div class="cat-choice" id="choiceB">
+            <img id="catB" alt="Tournament cat B">
+            <div class="label">No, pick me!</div>
+            <div class="hint">Only one moves on</div>
+          </div>
+        </div>
+
+        <div class="result-box" id="resultBox">
+          <h3 class="winner-title">Your Champion</h3>
+          <img class="winner-img" id="winnerImg" alt="Tournament winner">
+          <div class="winner-meta" id="winnerMeta"></div>
+
+          <div class="result-actions">
+            <button class="btn btn-primary" id="shareWinnerBtn">Share Winner</button>
+            <button class="btn btn-secondary" id="restartBtn">Play Again</button>
+          </div>
+        </div>
+      </section>
+
+      <aside class="side-panel">
+        <h3 class="leader-title">Top 10 Tournament Cats</h3>
+        <div class="leader-sub">Updated from picks on this device • daily bracket refresh</div>
+        <div class="leader-list" id="leaderboard"></div>
+        <div class="tiny-note">
+          The tournament cats change every 24 hours.  
+          Win rate is based on wins / total appearances and stored efficiently.
+        </div>
+      </aside>
+    </div>
+  </div>
+
+  <div class="explosion" id="explosion"></div>
+
+  <script>
+    const API = "https://api.thecatapi.com/v1/images/search";
+    const KEY = "live_fDX7IYEHhfAbsRlNUYMHWpBRLFjjra8l8ixoHazYl93KLEkPHf5yUuV6OhabAb7R";
+
+    const TOURNAMENT_KEY = "ltc_daily_tournament_v1";
+    const TOURNAMENT_STATS_KEY = "ltc_tournament_stats_v1";
+
+    let tournamentCats = [];
+    let rounds = [];
+    let currentRoundIndex = 0;
+    let currentMatchIndex = 0;
+    let currentPair = null;
+    let completedMatches = 0;
+    const TOTAL_MATCHES = 31;
+
+    function todayKey() {
+      return new Date().toISOString().slice(0, 10);
+    }
+
+    function hash(url) {
+      return btoa(url).replace(/=/g, "").slice(0, 12);
+    }
+
+    async function getCats(n) {
+      const res = await fetch(`${API}?limit=${n}`, {
+        headers: { "x-api-key": KEY }
+      });
+      const data = await res.json();
+      return data.map(x => x.url);
+    }
+
+    async function getDailyTournamentCats() {
+      const today = todayKey();
+      const saved = localStorage.getItem(TOURNAMENT_KEY);
+
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (parsed.date === today && Array.isArray(parsed.urls) && parsed.urls.length === 32) {
+          return parsed.urls;
+        }
+      }
+
+      const urls = await getCats(32);
+      localStorage.setItem(TOURNAMENT_KEY, JSON.stringify({
+        date: today,
+        urls
+      }));
+      return urls;
+    }
+
+    function getStats() {
+      const saved = localStorage.getItem(TOURNAMENT_STATS_KEY);
+      const data = saved ? JSON.parse(saved) : {};
+
+      if (data.__date !== todayKey()) {
+        return { __date: todayKey() };
+      }
+
+      return data;
+    }
+
+    function saveStats(data) {
+      const keys = Object.keys(data).filter(k => k !== "__date");
+      if (keys.length > 120) {
+        delete data[keys[0]];
+      }
+      localStorage.setItem(TOURNAMENT_STATS_KEY, JSON.stringify(data));
+    }
+
+    function recordTournamentBattle(winUrl, loseUrl) {
+      const data = getStats();
+
+      const winId = hash(winUrl);
+      const loseId = hash(loseUrl);
+
+      if (!data[winId]) data[winId] = { w: 0, v: 0, url: winUrl };
+      if (!data[loseId]) data[loseId] = { w: 0, v: 0, url: loseUrl };
+
+      data[winId].w += 1;
+      data[winId].v += 1;
+      data[loseId].v += 1;
+
+      saveStats(data);
+      return data[winId];
+    }
+
+    function updateLeaderboard() {
+      const data = getStats();
+      let arr = Object.entries(data)
+        .filter(([key]) => key !== "__date")
+        .map(([, value]) => value);
+
+      arr = arr.filter(x => x.v >= 1);
+      arr.sort((a, b) => {
+        const rateA = a.w / a.v;
+        const rateB = b.w / b.v;
+        if (rateB !== rateA) return rateB - rateA;
+        return b.v - a.v;
+      });
+
+      arr = arr.slice(0, 10);
+
+      const el = document.getElementById("leaderboard");
+      el.innerHTML = "";
+
+      if (!arr.length) {
+        el.innerHTML = `<div class="empty-state">No tournament cats ranked yet.<br>Start picking to build today’s top 10.</div>`;
+        return;
+      }
+
+      arr.forEach((cat, idx) => {
+        const rate = Math.round((cat.w / cat.v) * 100);
+
+        const item = document.createElement("div");
+        item.className = "leader-item";
+        item.innerHTML = `
+          <img src="${cat.url}" alt="Ranked cat" loading="lazy">
+          <div>
+            <div class="leader-rank">#${idx + 1}</div>
+            <div class="leader-rate">${rate}% win rate</div>
+            <div class="leader-votes">${cat.w} wins • ${cat.v} appearances</div>
+          </div>
+        `;
+        el.appendChild(item);
+      });
+    }
+
+    function roundName(size) {
+      if (size === 32) return "Round of 32";
+      if (size === 16) return "Sweet 16";
+      if (size === 8) return "Elite 8";
+      if (size === 4) return "Final 4";
+      if (size === 2) return "Grand Final";
+      return "Tournament";
+    }
+
+    function updateProgress() {
+      const progress = Math.round((completedMatches / TOTAL_MATCHES) * 100);
+      document.getElementById("progressFill").style.width = `${progress}%`;
+      document.getElementById("progressText").textContent = `${completedMatches} / ${TOTAL_MATCHES} picks completed`;
+
+      const currentRound = rounds[currentRoundIndex] || [];
+      document.getElementById("roundLabel").textContent = roundName(currentRound.length);
+      document.getElementById("roundText").textContent = currentRound.length > 2 ? "Pick your cutest cat 💖" : "The crown is close 👑";
+
+      const totalMatchesThisRound = Math.max(1, currentRound.length / 2);
+      const currentMatch = Math.min(currentMatchIndex + 1, totalMatchesThisRound);
+      document.getElementById("matchLabel").textContent = `Match ${currentMatch} / ${totalMatchesThisRound}`;
+    }
+
+    function loadImage(img, url) {
+      img.classList.remove("loaded");
+      img.onload = () => img.classList.add("loaded");
+      img.src = url;
+    }
+
+    function showExplosion(rate) {
+      const el = document.getElementById("explosion");
+      el.innerHTML = `${rate}% WIN RATE!<small>That cat just advanced ✨</small>`;
+      el.classList.add("show");
+
+      setTimeout(() => {
+        el.classList.remove("show");
+      }, 3000);
+    }
+
+    function renderCurrentMatch() {
+      const round = rounds[currentRoundIndex];
+
+      if (!round || round.length === 1) {
+        renderWinner(round[0]);
+        return;
+      }
+
+      currentPair = [round[currentMatchIndex], round[currentMatchIndex + 1]];
+      loadImage(document.getElementById("catA"), currentPair[0]);
+      loadImage(document.getElementById("catB"), currentPair[1]);
+      updateProgress();
+    }
+
+    function nextMatch(winnerUrl) {
+      const loserUrl = currentPair[0] === winnerUrl ? currentPair[1] : currentPair[0];
+      const stat = recordTournamentBattle(winnerUrl, loserUrl);
+      const rate = Math.round((stat.w / stat.v) * 100);
+
+      updateLeaderboard();
+      showExplosion(rate);
+
+      const nextRoundIndex = currentRoundIndex + 1;
+      if (!rounds[nextRoundIndex]) rounds[nextRoundIndex] = [];
+      rounds[nextRoundIndex].push(winnerUrl);
+
+      completedMatches += 1;
+
+      setTimeout(() => {
+        currentMatchIndex += 2;
+        const currentRound = rounds[currentRoundIndex];
+
+        if (currentMatchIndex >= currentRound.length) {
+          currentRoundIndex += 1;
+          currentMatchIndex = 0;
+        }
+
+        renderCurrentMatch();
+      }, 450);
+    }
+
+    function renderWinner(url) {
+      document.getElementById("battleArea").style.display = "none";
+      document.getElementById("resultBox").classList.add("show");
+      document.getElementById("winnerImg").src = url;
+
+      const data = getStats();
+      const id = hash(url);
+      const stat = data[id];
+      const rate = stat ? Math.round((stat.w / stat.v) * 100) : 100;
+
+      document.getElementById("winnerMeta").textContent =
+        `Your champion finished with a ${rate}% win rate in today’s bracket.`;
+
+      const shareBtn = document.getElementById("shareWinnerBtn");
+      shareBtn.onclick = () => shareCat(url, "I just finished today’s cat tournament and crowned this champion!");
+    }
+
+    async function shareCat(url, text = "Look at this cute cat from LookThatCats!") {
+      if (navigator.share) {
+        try {
+          await navigator.share({
+            title: "LookThatCats",
+            text,
+            url
+          });
+        } catch (e) {}
+      } else {
+        window.open(
+          "https://twitter.com/intent/tweet?text=" + encodeURIComponent(text) + "&url=" + encodeURIComponent(url),
+          "_blank"
+        );
+      }
+    }
+
+    function startTournament(urls) {
+      tournamentCats = urls.slice();
+      rounds = [tournamentCats.slice()];
+      currentRoundIndex = 0;
+      currentMatchIndex = 0;
+      completedMatches = 0;
+      document.getElementById("battleArea").style.display = "grid";
+      document.getElementById("resultBox").classList.remove("show");
+      renderCurrentMatch();
+    }
+
+    document.getElementById("choiceA").addEventListener("click", () => {
+      if (currentPair) nextMatch(currentPair[0]);
+    });
+
+    document.getElementById("choiceB").addEventListener("click", () => {
+      if (currentPair) nextMatch(currentPair[1]);
+    });
+
+    document.getElementById("restartBtn").addEventListener("click", async () => {
+      const urls = await getDailyTournamentCats();
+      startTournament(urls);
+    });
+
+    (async function init() {
+      updateLeaderboard();
+      const urls = await getDailyTournamentCats();
+      startTournament(urls);
+    })();
+  </script>
+</body>
+</html>
