@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
 
 <title>LookThatCats - Rate Cute Cats</title>
+<link rel="icon" href="pink-cat-logo.svg">
 <meta name="description" content="Rate cute cats, discover the most loved cats of the day and play the daily cat tournament.">
 
 <link href="https://fonts.googleapis.com/css2?family=Pacifico&family=Inter:wght@400;600&display=swap" rel="stylesheet">
@@ -69,6 +70,20 @@ h1{
 
 .cat-card img.loaded{
   opacity:1;
+}
+
+  .logo{
+display:flex;
+align-items:center;
+gap:12px;
+font-size:32px;
+font-weight:800;
+color:#ff69b4;
+}
+
+.logo img{
+width:50px;
+height:50px;
 }
 
 .rate-buttons{
@@ -141,7 +156,10 @@ button{
 
 <body>
 
-<h1>Look That Cats</h1>
+<div class="logo">
+<img src="pink-cat-logo.svg">
+<span>LookThatCats</span>
+</div>
 
 <div style="margin:18px 0 8px;">
   <a href="/tournament.html" style="text-decoration:none;">
