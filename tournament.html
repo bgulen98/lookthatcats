@@ -8,7 +8,7 @@
   <meta name="theme-color" content="#121212" />
   <link rel="preconnect" href="https://cdn2.thecatapi.com" />
   <link rel="dns-prefetch" href="https://cdn2.thecatapi.com" />
-  <link href="https://fonts.googleapis.com/css2?family=Pacifico&family=Inter:wght@400;600;700&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Pacifico&family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet" />
 
   <style>
     :root{
@@ -19,6 +19,9 @@
       --line:#2d2d2d;
       --pink:#ff69b4;
       --pink-soft:#ff8cc8;
+      --gold:#ffd76a;
+      --silver:#d6d9e0;
+      --bronze:#d89a63;
       --shadow:0 10px 30px rgba(0,0,0,.28);
     }
 
@@ -31,12 +34,15 @@
         linear-gradient(180deg, #141414 0%, #111111 100%);
       color:var(--text);
       font-family:'Inter', Arial, sans-serif;
+      overflow-x:hidden;
     }
 
     .page{
       max-width:1280px;
       margin:0 auto;
       padding:22px 18px 50px;
+      position:relative;
+      z-index:1;
     }
 
     .topbar{
@@ -117,6 +123,8 @@
     .main-panel{
       padding:22px;
       min-width:0;
+      position:relative;
+      overflow:hidden;
     }
 
     .side-panel{
@@ -136,7 +144,7 @@
 
     .panel-title{
       font-size:22px;
-      font-weight:700;
+      font-weight:800;
       margin:0;
     }
 
@@ -267,111 +275,6 @@
       text-align:center;
     }
 
-    .explosion{
-      position:fixed;
-      left:50%;
-      top:44%;
-      transform:translate(-50%,-50%) scale(.92);
-      padding:18px 24px;
-      border-radius:18px;
-      background:rgba(26,26,26,.96);
-      border:1px solid rgba(255,105,180,.35);
-      color:#fff;
-      font-weight:800;
-      font-size:clamp(24px,4vw,40px);
-      box-shadow:0 18px 40px rgba(0,0,0,.35);
-      opacity:0;
-      pointer-events:none;
-      z-index:999;
-      transition:opacity .2s ease, transform .2s ease;
-      text-align:center;
-    }
-
-    .explosion.show{
-      opacity:1;
-      transform:translate(-50%,-50%) scale(1);
-    }
-
-    .explosion small{
-      display:block;
-      font-size:14px;
-      color:#ffd5e9;
-      margin-top:8px;
-      font-weight:600;
-    }
-
-    .result-box{
-      display:none;
-      margin-top:22px;
-      padding:20px;
-      background:var(--panel);
-      border:1px solid #303030;
-      border-radius:22px;
-      text-align:center;
-    }
-
-    .result-box.show{
-      display:block;
-    }
-
-    .winner-title{
-      font-family:'Pacifico', cursive;
-      color:var(--pink);
-      font-size:34px;
-      margin:0 0 12px;
-    }
-
-    .winner-img{
-      width:min(320px, 100%);
-      aspect-ratio:1/1;
-      object-fit:cover;
-      border-radius:18px;
-      display:block;
-      margin:0 auto 14px;
-    }
-
-    .winner-meta{
-      color:var(--muted);
-      font-size:15px;
-      margin-bottom:14px;
-    }
-
-    .result-actions{
-      display:flex;
-      justify-content:center;
-      gap:12px;
-      flex-wrap:wrap;
-    }
-
-    .btn{
-      border:none;
-      border-radius:999px;
-      padding:12px 18px;
-      cursor:pointer;
-      font-weight:700;
-      transition:.18s ease;
-    }
-
-    .btn-primary{
-      background:linear-gradient(90deg, #ff69b4, #ff93c8);
-      color:#161616;
-    }
-
-    .btn-primary:hover{
-      transform:translateY(-1px);
-    }
-
-    .btn-secondary{
-      background:#262626;
-      color:#fff;
-      border:1px solid #343434;
-    }
-
-    .btn-secondary:hover{
-      background:#2d2d2d;
-      transform:translateY(-1px);
-    }
-
     .leader-title{
       margin:0 0 12px;
       font-size:20px;
@@ -441,6 +344,250 @@
       line-height:1.5;
     }
 
+    .explosion{
+      position:fixed;
+      left:50%;
+      top:44%;
+      transform:translate(-50%,-50%) scale(.92);
+      padding:18px 24px;
+      border-radius:18px;
+      background:rgba(26,26,26,.96);
+      border:1px solid rgba(255,105,180,.35);
+      color:#fff;
+      font-weight:800;
+      font-size:clamp(24px,4vw,40px);
+      box-shadow:0 18px 40px rgba(0,0,0,.35);
+      opacity:0;
+      pointer-events:none;
+      z-index:999;
+      transition:opacity .2s ease, transform .2s ease;
+      text-align:center;
+    }
+
+    .explosion.show{
+      opacity:1;
+      transform:translate(-50%,-50%) scale(1);
+    }
+
+    .explosion small{
+      display:block;
+      font-size:14px;
+      color:#ffd5e9;
+      margin-top:8px;
+      font-weight:600;
+    }
+
+    .round-screen{
+      display:none;
+      text-align:center;
+      padding:28px 18px 12px;
+      min-height:420px;
+      align-items:center;
+      justify-content:center;
+      flex-direction:column;
+      gap:14px;
+    }
+
+    .round-screen.show{
+      display:flex;
+    }
+
+    .round-badge{
+      padding:10px 16px;
+      border-radius:999px;
+      background:rgba(255,105,180,.12);
+      border:1px solid rgba(255,105,180,.22);
+      color:#ffd7ea;
+      font-size:13px;
+      letter-spacing:.08em;
+      text-transform:uppercase;
+    }
+
+    .round-title{
+      font-family:'Pacifico', cursive;
+      color:var(--pink);
+      font-size:clamp(34px,6vw,54px);
+      line-height:1.1;
+      margin:0;
+      font-weight:400;
+    }
+
+    .round-desc{
+      color:var(--muted);
+      font-size:16px;
+      max-width:560px;
+      line-height:1.6;
+    }
+
+    .round-glow{
+      width:160px;
+      height:160px;
+      border-radius:999px;
+      background:radial-gradient(circle, rgba(255,105,180,.22) 0%, rgba(255,105,180,.08) 42%, transparent 70%);
+      filter:blur(4px);
+      animation: pulseGlow 1.8s infinite ease-in-out;
+    }
+
+    @keyframes pulseGlow{
+      0%{transform:scale(.95);opacity:.7}
+      50%{transform:scale(1.05);opacity:1}
+      100%{transform:scale(.95);opacity:.7}
+    }
+
+    .btn{
+      border:none;
+      border-radius:999px;
+      padding:12px 18px;
+      cursor:pointer;
+      font-weight:700;
+      transition:.18s ease;
+    }
+
+    .btn-primary{
+      background:linear-gradient(90deg, #ff69b4, #ff93c8);
+      color:#161616;
+    }
+
+    .btn-primary:hover{
+      transform:translateY(-1px);
+    }
+
+    .btn-secondary{
+      background:#262626;
+      color:#fff;
+      border:1px solid #343434;
+    }
+
+    .btn-secondary:hover{
+      background:#2d2d2d;
+      transform:translateY(-1px);
+    }
+
+    .result-box{
+      display:none;
+      margin-top:8px;
+      text-align:center;
+      position:relative;
+      min-height:420px;
+      overflow:hidden;
+      padding:16px;
+    }
+
+    .result-box.show{
+      display:block;
+    }
+
+    .winner-stage{
+      position:relative;
+      z-index:2;
+      padding:18px 10px 8px;
+    }
+
+    .winner-crown{
+      font-size:44px;
+      margin-bottom:6px;
+      animation:bob 1.8s ease-in-out infinite;
+    }
+
+    @keyframes bob{
+      0%{transform:translateY(0)}
+      50%{transform:translateY(-6px)}
+      100%{transform:translateY(0)}
+    }
+
+    .winner-title{
+      font-family:'Pacifico', cursive;
+      color:var(--gold);
+      font-size:clamp(38px,6vw,62px);
+      line-height:1.05;
+      margin:0 0 12px;
+      font-weight:400;
+      text-shadow:0 0 18px rgba(255,215,106,.16);
+    }
+
+    .winner-glow{
+      position:absolute;
+      inset:auto 50% auto auto;
+      left:50%;
+      top:42%;
+      transform:translate(-50%,-50%);
+      width:360px;
+      height:360px;
+      border-radius:999px;
+      background:radial-gradient(circle, rgba(255,105,180,.16) 0%, rgba(255,215,106,.10) 30%, transparent 70%);
+      filter:blur(10px);
+      z-index:0;
+      pointer-events:none;
+    }
+
+    .winner-img{
+      width:min(360px, 92%);
+      aspect-ratio:1/1;
+      object-fit:cover;
+      border-radius:24px;
+      display:block;
+      margin:0 auto 16px;
+      position:relative;
+      z-index:2;
+      box-shadow:0 20px 40px rgba(0,0,0,.35);
+      border:2px solid rgba(255,255,255,.06);
+    }
+
+    .winner-meta{
+      color:#ffdbe9;
+      font-size:17px;
+      margin-bottom:14px;
+      position:relative;
+      z-index:2;
+    }
+
+    .winner-sub{
+      color:var(--muted);
+      font-size:14px;
+      margin-bottom:18px;
+      position:relative;
+      z-index:2;
+    }
+
+    .result-actions{
+      display:flex;
+      justify-content:center;
+      gap:12px;
+      flex-wrap:wrap;
+      position:relative;
+      z-index:2;
+    }
+
+    #confetti{
+      position:absolute;
+      inset:0;
+      width:100%;
+      height:100%;
+      pointer-events:none;
+      z-index:1;
+    }
+
+    .stage-quarter .round-glow,
+    .stage-semi .round-glow,
+    .stage-final .round-glow{
+      width:220px;
+      height:220px;
+    }
+
+    .stage-quarter .round-title{
+      color:#ff9dd0;
+    }
+
+    .stage-semi .round-title{
+      color:#ffd8ee;
+      text-shadow:0 0 16px rgba(255,105,180,.16);
+    }
+
+    .stage-final .round-title{
+      color:var(--gold);
+      text-shadow:0 0 18px rgba(255,215,106,.18);
+    }
+
     @media (max-width: 980px){
       .layout{
         grid-template-columns:1fr;
@@ -468,6 +615,11 @@
 
       .panel-title{
         font-size:20px;
+      }
+
+      .winner-glow{
+        width:280px;
+        height:280px;
       }
     }
   </style>
@@ -503,6 +655,16 @@
           </div>
         </div>
 
+        <div id="roundScreen" class="round-screen">
+          <div class="round-badge" id="roundBadge">Next Stage</div>
+          <div class="round-glow"></div>
+          <h3 class="round-title" id="roundScreenTitle">Sweet 16</h3>
+          <div class="round-desc" id="roundScreenDesc">
+            You made it through the first wave. Ready for the next stage?
+          </div>
+          <button class="btn btn-primary" id="continueRoundBtn">Continue</button>
+        </div>
+
         <div class="battle-area" id="battleArea">
           <div class="cat-choice" id="choiceA">
             <img id="catA" alt="Tournament cat A">
@@ -522,13 +684,19 @@
         <div id="loadingNote" class="loading-note"></div>
 
         <div class="result-box" id="resultBox">
-          <h3 class="winner-title">Your Champion</h3>
-          <img class="winner-img" id="winnerImg" alt="Tournament winner">
-          <div class="winner-meta" id="winnerMeta"></div>
+          <canvas id="confetti"></canvas>
+          <div class="winner-stage">
+            <div class="winner-glow"></div>
+            <div class="winner-crown">👑</div>
+            <h3 class="winner-title">Champion Crowned</h3>
+            <img class="winner-img" id="winnerImg" alt="Tournament winner">
+            <div class="winner-meta" id="winnerMeta"></div>
+            <div class="winner-sub" id="winnerSub"></div>
 
-          <div class="result-actions">
-            <button class="btn btn-primary" id="shareWinnerBtn">Share Winner</button>
-            <button class="btn btn-secondary" id="restartBtn">Play Again</button>
+            <div class="result-actions">
+              <button class="btn btn-primary" id="shareWinnerBtn">Share Winner</button>
+              <button class="btn btn-secondary" id="restartBtn">Play Again</button>
+            </div>
           </div>
         </div>
       </section>
@@ -560,10 +728,25 @@
     function roundName(size) {
       if (size === 32) return "Round of 32";
       if (size === 16) return "Sweet 16";
-      if (size === 8) return "Elite 8";
-      if (size === 4) return "Final 4";
+      if (size === 8) return "Quarter Finals";
+      if (size === 4) return "Semi Finals";
       if (size === 2) return "Grand Final";
       return "Tournament";
+    }
+
+    function roundStageClass(size) {
+      if (size === 8) return "stage-quarter";
+      if (size === 4) return "stage-semi";
+      if (size === 2) return "stage-final";
+      return "";
+    }
+
+    function roundDescription(size) {
+      if (size === 16) return "Your first 16 winners are in. Things are getting cuter now.";
+      if (size === 8) return "Only the strongest fluff remains. Welcome to the Quarter Finals.";
+      if (size === 4) return "These cats are elite. Semi Finals unlocked.";
+      if (size === 2) return "This is it. One last battle decides today’s champion.";
+      return "Ready for the next stage?";
     }
 
     function updateProgress() {
@@ -616,6 +799,14 @@
 
         const item = document.createElement("div");
         item.className = "leader-item";
+
+        let accent = "";
+        if (idx === 0) accent = `border-color: rgba(255,215,106,.35); box-shadow: inset 0 0 0 1px rgba(255,215,106,.1);`;
+        if (idx === 1) accent = `border-color: rgba(214,217,224,.25);`;
+        if (idx === 2) accent = `border-color: rgba(216,154,99,.25);`;
+
+        item.style.cssText += accent;
+
         item.innerHTML = `
           <img src="${cat.url}" alt="Ranked cat" loading="lazy">
           <div>
@@ -662,6 +853,23 @@
       return localStats[winnerCat.id];
     }
 
+    function showRoundTransition(nextRoundSize) {
+      const screen = document.getElementById("roundScreen");
+      screen.className = "round-screen show " + roundStageClass(nextRoundSize);
+
+      document.getElementById("roundBadge").textContent = "Next Stage";
+      document.getElementById("roundScreenTitle").textContent = roundName(nextRoundSize);
+      document.getElementById("roundScreenDesc").textContent = roundDescription(nextRoundSize);
+
+      document.getElementById("battleArea").style.display = "none";
+      document.getElementById("loadingNote").textContent = "";
+    }
+
+    function hideRoundTransition() {
+      document.getElementById("roundScreen").className = "round-screen";
+      document.getElementById("battleArea").style.display = "grid";
+    }
+
     function renderCurrentMatch() {
       const round = rounds[currentRoundIndex];
 
@@ -671,6 +879,7 @@
       }
 
       currentPair = [round[currentMatchIndex], round[currentMatchIndex + 1]];
+      hideRoundTransition();
       loadImage(document.getElementById("catA"), currentPair[0].url);
       loadImage(document.getElementById("catB"), currentPair[1].url);
       updateProgress();
@@ -689,7 +898,9 @@
       showExplosion(rate);
       setBattleDisabled(true, "Nice pick ✨");
 
+      const currentRound = rounds[currentRoundIndex];
       const nextRoundIndex = currentRoundIndex + 1;
+
       if (!rounds[nextRoundIndex]) rounds[nextRoundIndex] = [];
       rounds[nextRoundIndex].push(winnerCat);
 
@@ -697,14 +908,29 @@
 
       setTimeout(() => {
         currentMatchIndex += 2;
-        const currentRound = rounds[currentRoundIndex];
 
-        if (currentMatchIndex >= currentRound.length) {
+        const finishedRound = currentMatchIndex >= currentRound.length;
+
+        if (finishedRound) {
           currentRoundIndex += 1;
           currentMatchIndex = 0;
-        }
 
-        renderCurrentMatch();
+          const upcomingRound = rounds[currentRoundIndex];
+
+          if (upcomingRound && upcomingRound.length > 1) {
+            showRoundTransition(upcomingRound.length);
+            isAdvancing = false;
+            setBattleDisabled(false, "");
+
+            if (upcomingRound.length === 2) {
+              document.getElementById("roundBadge").textContent = "Final Stage";
+            }
+          } else {
+            renderCurrentMatch();
+          }
+        } else {
+          renderCurrentMatch();
+        }
       }, 280);
     }
 
@@ -741,8 +967,64 @@
       return data;
     }
 
+    function launchConfetti() {
+      const canvas = document.getElementById("confetti");
+      const box = document.getElementById("resultBox");
+      const ctx = canvas.getContext("2d");
+
+      const rect = box.getBoundingClientRect();
+      canvas.width = rect.width * devicePixelRatio;
+      canvas.height = rect.height * devicePixelRatio;
+      canvas.style.width = rect.width + "px";
+      canvas.style.height = rect.height + "px";
+      ctx.scale(devicePixelRatio, devicePixelRatio);
+
+      const colors = ["#ff69b4", "#ffd76a", "#ffffff", "#ff9dd0", "#ffc6de"];
+      const pieces = Array.from({ length: 120 }, () => ({
+        x: Math.random() * rect.width,
+        y: -20 - Math.random() * rect.height * 0.4,
+        w: 6 + Math.random() * 8,
+        h: 8 + Math.random() * 10,
+        color: colors[Math.floor(Math.random() * colors.length)],
+        speed: 2 + Math.random() * 4,
+        drift: -2 + Math.random() * 4,
+        rot: Math.random() * Math.PI,
+        rotSpeed: -0.2 + Math.random() * 0.4
+      }));
+
+      let start = null;
+      function frame(ts) {
+        if (!start) start = ts;
+        const elapsed = ts - start;
+
+        ctx.clearRect(0, 0, rect.width, rect.height);
+
+        pieces.forEach(p => {
+          p.y += p.speed;
+          p.x += p.drift;
+          p.rot += p.rotSpeed;
+
+          ctx.save();
+          ctx.translate(p.x, p.y);
+          ctx.rotate(p.rot);
+          ctx.fillStyle = p.color;
+          ctx.fillRect(-p.w / 2, -p.h / 2, p.w, p.h);
+          ctx.restore();
+        });
+
+        if (elapsed < 3500) {
+          requestAnimationFrame(frame);
+        } else {
+          ctx.clearRect(0, 0, rect.width, rect.height);
+        }
+      }
+
+      requestAnimationFrame(frame);
+    }
+
     async function renderWinner(cat) {
       document.getElementById("battleArea").style.display = "none";
+      document.getElementById("roundScreen").className = "round-screen";
       document.getElementById("resultBox").classList.add("show");
       document.getElementById("winnerImg").src = cat.url;
 
@@ -750,12 +1032,17 @@
       const localRate = localChampionStat ? Math.round((localChampionStat.w / localChampionStat.v) * 100) : 100;
 
       document.getElementById("winnerMeta").textContent =
-        `Your champion finished your bracket with a ${localRate}% win rate.`;
+        `Your champion finished your bracket with a ${localRate}% personal win rate.`;
+
+      document.getElementById("winnerSub").textContent =
+        "Submitting your full tournament to today’s global rankings...";
 
       document.getElementById("shareWinnerBtn").onclick = () => shareCat(
         cat.url,
         "I just finished today’s cat tournament and crowned this champion!"
       );
+
+      setTimeout(() => launchConfetti(), 100);
 
       try {
         const data = await submitTournamentResults(cat);
@@ -763,11 +1050,15 @@
           const globalRate = Math.round((data.champion.w / data.champion.v) * 100);
           document.getElementById("winnerMeta").textContent =
             `Your champion now holds a global ${globalRate}% win rate today.`;
+          document.getElementById("winnerSub").textContent =
+            "Your result has been added to today’s global cat rankings.";
         }
         setBattleDisabled(false, "Tournament saved 💖");
       } catch (err) {
         console.error(err);
-        setBattleDisabled(false, "Could not save your result. You can still share your winner.");
+        document.getElementById("winnerSub").textContent =
+          "Could not save your result, but your champion is still glorious.";
+        setBattleDisabled(false, "");
       }
     }
 
@@ -799,6 +1090,7 @@
 
       document.getElementById("battleArea").style.display = "grid";
       document.getElementById("resultBox").classList.remove("show");
+      document.getElementById("roundScreen").className = "round-screen";
       setBattleDisabled(false, "");
 
       renderCurrentMatch();
@@ -810,6 +1102,10 @@
 
     document.getElementById("choiceB").addEventListener("click", () => {
       if (currentPair) nextMatch(currentPair[1]);
+    });
+
+    document.getElementById("continueRoundBtn").addEventListener("click", () => {
+      renderCurrentMatch();
     });
 
     document.getElementById("restartBtn").addEventListener("click", async () => {
