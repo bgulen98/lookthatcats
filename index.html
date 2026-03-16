@@ -1,612 +1,248 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
 
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
 
 <title>LookThatCats - Rate Cute Cats</title>
+<meta name="description" content="Rate cute cats, discover the most loved cats of the day and play the daily cat tournament.">
 
-<meta name="description" content="Rate cute cats and discover the cutest cat on the internet.">
-
-<link rel="preconnect" href="https://cdn2.thecatapi.com">
-
-<link href="https://fonts.googleapis.com/css2?family=Pacifico&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Pacifico&family=Inter:wght@400;600&display=swap" rel="stylesheet">
 
 <style>
 
 body{
 background:#121212;
 color:white;
-font-family:Arial;
+font-family:Inter;
 margin:0;
 text-align:center;
 }
 
 h1{
-margin-top:20px;
+font-family:Pacifico;
+color:#ff69b4;
+margin-top:30px;
+font-size:42px;
 }
 
 .section{
 margin-top:40px;
 }
 
-.divider{
+.line{
+width:80%;
 height:1px;
 background:#2a2a2a;
-width:80%;
 margin:40px auto;
 }
 
-.container{
+.battle{
 display:flex;
 justify-content:center;
-gap:30px;
+gap:40px;
+margin-top:30px;
 flex-wrap:wrap;
 }
 
 .cat-card{
-position:relative;
+background:#1b1b1b;
+padding:15px;
+border-radius:16px;
+transition:.2s;
+cursor:pointer;
+}
+
+.cat-card:hover{
+transform:scale(1.05);
 }
 
 .cat-card img{
-
-width:220px;
-height:220px;
+width:260px;
+height:260px;
 object-fit:cover;
 border-radius:12px;
-cursor:pointer;
-transition:.2s;
-
 }
 
-.cat-card img:hover{
-transform:scale(1.03);
+.rate-buttons{
+margin-top:20px;
 }
 
-.cat-card img.selected{
-border:4px solid hotpink;
-}
-
-.share{
-
-position:absolute;
-top:8px;
-right:8px;
-
-}
-
-.share button{
-
-background:black;
-color:white;
-border:none;
-padding:6px 8px;
-border-radius:6px;
-cursor:pointer;
-
-}
-
-.vote-buttons button{
-
+.rate-buttons button{
 margin:5px;
-padding:8px 12px;
+padding:10px 15px;
 border:none;
-background:#333;
+border-radius:8px;
+background:#ff69b4;
 color:white;
-border-radius:6px;
 cursor:pointer;
-
 }
 
-.vote-buttons button:hover{
-
-background:#555;
-
+.rate-buttons button:hover{
+background:#ff85c4;
 }
 
-.top-cat-grid{
-
-display:grid;
-grid-template-columns:repeat(auto-fit,minmax(100px,1fr));
-gap:10px;
-padding:20px;
-
+.topcats{
+display:flex;
+justify-content:center;
+gap:15px;
+flex-wrap:wrap;
 }
 
-.top-cat-grid img{
-
-width:100px;
-height:100px;
-object-fit:cover;
+.topcats img{
+width:120px;
+height:120px;
 border-radius:10px;
-
+object-fit:cover;
 }
 
-.catday-title{
-
-font-family:'Pacifico',cursive;
-color:#ff69b4;
-font-size:28px;
-
-}
-
-#catOfDay img{
-
+.daily img{
 width:200px;
 border-radius:12px;
-
 }
 
-#winEffect{
-
-position:fixed;
-top:45%;
-left:50%;
-transform:translate(-50%,-50%);
-font-size:38px;
-font-weight:bold;
-color:#ff69b4;
-opacity:0;
-transition:opacity .3s;
-pointer-events:none;
-
+button{
+cursor:pointer;
 }
 
-.leaderboard img{
-
-width:70px;
-height:70px;
-object-fit:cover;
-border-radius:10px;
-margin:5px;
-
-}
-
-footer{
-
-margin-top:60px;
-padding:20px;
-font-size:14px;
-color:#aaa;
-
-}
-
-footer a{
-
-color:#aaa;
-text-decoration:none;
-margin:0 6px;
-
-}
-
-footer a:hover{
-
-color:white;
-
-}
-
-  .cat-card img{
-opacity:0;
-transition:opacity .25s ease;
-}
-
-.cat-card img.loaded{
-opacity:1;
-}
-
-  .cat-card img:hover{
-transform:scale(1.04);
-}
-  
 </style>
 
 </head>
 
 <body>
 
-<h1>🐱 LookThatCats</h1>
-  
-  <div style="margin:18px 0 8px;">
-  <a href="/tournament.html" style="
-    display:inline-block;
-    padding:12px 18px;
-    border-radius:999px;
-    text-decoration:none;
-    background:linear-gradient(90deg,#ff69b4,#ff9ace);
-    color:#151515;
-    font-weight:700;
-    box-shadow:0 10px 24px rgba(0,0,0,.22);
-  ">
-    🏆 Play Daily Tournament
-  </a>
-</div>
+<h1>Look That Cats</h1>
 
 <div class="section">
 
-<h2>Cat VS Cat</h2>
+<h2>Cat vs Cat</h2>
 
-<div class="container">
+<div class="battle">
 
 <div class="cat-card">
-
 <img id="cat1">
-
-<div class="share">
-
-<button onclick="shareCat('cat1')">Share</button>
-
+<div class="rate-buttons">
+<button onclick="rate(1)">1</button>
+<button onclick="rate(2)">2</button>
+<button onclick="rate(3)">3</button>
+<button onclick="rate(4)">4</button>
+<button onclick="rate(5)">5</button>
 </div>
-
 </div>
 
 <div class="cat-card">
-
 <img id="cat2">
-
-<div class="share">
-
-<button onclick="shareCat('cat2')">Share</button>
-
+<div class="rate-buttons">
+<button onclick="rate(1)">1</button>
+<button onclick="rate(2)">2</button>
+<button onclick="rate(3)">3</button>
+<button onclick="rate(4)">4</button>
+<button onclick="rate(5)">5</button>
+</div>
 </div>
 
 </div>
 
 </div>
 
-<div class="vote-buttons">
-
-<button onclick="vote()">Vote</button>
-
-</div>
-
-</div>
-
-<div class="divider"></div>
+<div class="line"></div>
 
 <div class="section">
 
 <h2>Top 10 Cats</h2>
 
-<div id="topCats" class="top-cat-grid"></div>
+<div class="topcats" id="topcats"></div>
 
 </div>
 
-<div class="divider"></div>
+<div class="line"></div>
+
+<div class="section daily">
+
+<h2 style="color:#ff69b4;font-family:Pacifico;">Cat Of The Day</h2>
+
+<img id="dailycat">
+
+</div>
+
+<div class="line"></div>
 
 <div class="section">
 
-<h2 class="catday-title">Cat of the Day</h2>
-
-<div id="catOfDay"></div>
+<a href="/tournament.html">
+<button style="
+padding:12px 20px;
+background:#ff69b4;
+border:none;
+border-radius:12px;
+color:white;
+font-size:16px;
+">
+Play Daily Cat Tournament
+</button>
+</a>
 
 </div>
-
-<div class="divider"></div>
-
-<div class="section">
-
-<h2>Leaderboard</h2>
-
-<div id="leaderboard" class="leaderboard"></div>
-
-</div>
-
-<div id="winEffect"></div>
-
-<footer>
-
-<a href="/about.html">About</a> |
-<a href="/privacy.html">Privacy Policy</a> |
-<a href="/terms.html">Terms</a> |
-<a href="/contact.html">Contact</a>
-
-</footer>
 
 <script>
 
-const API="https://api.thecatapi.com/v1/images/search"
-const KEY="live_fDX7IYEHhfAbsRlNUYMHWpBRLFjjra8l8ixoHazYl93KLEkPHf5yUuV6OhabAb7R"
-
-let selected=null
-let pool=[]
-
-function hash(url){
-
-return btoa(url).slice(0,10)
-
-}
-
-async function getCats(n){
-
-let r=await fetch(API+"?limit="+n,{headers:{'x-api-key':KEY}})
-let j=await r.json()
-
-return j.map(x=>x.url)
-
-}
-
-async function preload(){
-
-if(pool.length<20){
-
-let cats=await getCats(30)
-
-pool=pool.concat(cats)
-
-}
-
-}
-
 async function loadBattle(){
 
-await preload()
+const res=await fetch("/api/cats/random")
 
-let a=Math.floor(Math.random()*pool.length)
-let b=Math.floor(Math.random()*pool.length)
+const data=await res.json()
 
-loadImage(document.getElementById("cat1"),pool[a])
-loadImage(document.getElementById("cat2"),pool[b])
-
-setupSelect()
+document.getElementById("cat1").src=data[0]
+document.getElementById("cat2").src=data[1]
 
 }
 
-function setupSelect(){
+function rate(){
 
-document.querySelectorAll(".cat-card img").forEach(img=>{
-
-img.onclick=()=>{
-
-document.querySelectorAll(".cat-card img").forEach(c=>c.classList.remove("selected"))
-
-img.classList.add("selected")
-
-selected=img
+loadBattle()
 
 }
+
+async function loadTop(){
+
+const res=await fetch("/api/cats/top")
+
+const data=await res.json()
+
+const container=document.getElementById("topcats")
+
+container.innerHTML=""
+
+data.forEach(url=>{
+
+const img=document.createElement("img")
+
+img.src=url
+
+container.appendChild(img)
 
 })
 
 }
 
-function recordVote(url){
+async function loadDaily(){
 
-let data=JSON.parse(localStorage.getItem("stats")||"{}")
+const res=await fetch("/api/cats/daily")
 
-let id=hash(url)
+const url=await res.json()
 
-if(!data[id]){
-
-data[id]={w:0,v:0,url:url}
-
-}
-
-data[id].v++
-data[id].w++
-
-if(Object.keys(data).length>200){
-
-delete data[Object.keys(data)[0]]
-
-}
-
-localStorage.setItem("stats",JSON.stringify(data))
-
-return data[id]
-
-}
-
-function vote(){
-
-if(!selected){
-
-alert("Select a cat")
-
-return
-
-}
-
-let stat=recordVote(selected.src)
-
-let rate=Math.round((stat.w/stat.v)*100)
-
-showWin(rate)
-
-updateLeaderboard()
-
-setTimeout(loadBattle,800)
-
-}
-
-function showWin(rate){
-
-let el=document.getElementById("winEffect")
-
-el.innerText=rate+"% WIN RATE!"
-
-el.style.opacity=1
-
-setTimeout(()=>{
-
-el.style.opacity=0
-
-},3000)
-
-}
-
-function updateLeaderboard(){
-
-let data=JSON.parse(localStorage.getItem("stats")||"{}")
-
-let arr=Object.values(data)
-
-arr=arr.filter(x=>x.v>3)
-
-arr.sort((a,b)=>(b.w/b.v)-(a.w/a.v))
-
-arr=arr.slice(0,10)
-
-let el=document.getElementById("leaderboard")
-
-el.innerHTML=""
-
-arr.forEach(c=>{
-
-let img=document.createElement("img")
-
-img.src=c.url
-
-img.loading="lazy"
-
-el.appendChild(img)
-
-})
-
-}
-
-async function loadTopCats(){
-
-let saved=localStorage.getItem("topcats")
-
-let now=new Date()
-
-let week=Math.floor(now.getTime()/604800000)
-
-if(saved){
-
-let data=JSON.parse(saved)
-
-if(data.week===week){
-
-renderTopCats(data.urls)
-
-return
-
-}
-
-}
-
-let urls=await getCats(10)
-
-localStorage.setItem("topcats",JSON.stringify({
-
-week:week,
-urls:urls
-
-}))
-
-renderTopCats(urls)
-
-}
-
-function renderTopCats(urls){
-
-let el=document.getElementById("topCats")
-
-el.innerHTML=""
-
-urls.forEach(u=>{
-
-let img=document.createElement("img")
-
-img.src=u
-img.loading="lazy"
-
-el.appendChild(img)
-
-})
-
-}
-
-async function loadCatOfDay(){
-
-let today=new Date().toISOString().slice(0,10)
-
-let saved=localStorage.getItem("catday")
-
-if(saved){
-
-let data=JSON.parse(saved)
-
-if(data.date===today){
-
-renderCatDay(data.url)
-
-return
-
-}
-
-}
-
-let url=(await getCats(1))[0]
-
-localStorage.setItem("catday",JSON.stringify({
-
-date:today,
-url:url
-
-}))
-
-renderCatDay(url)
-
-}
-
-function renderCatDay(url){
-
-document.getElementById("catOfDay").innerHTML=`<img src="${url}">`
-
-}
-
-function shareCat(id){
-
-let url=document.getElementById(id).src
-
-if(navigator.share){
-
-navigator.share({
-
-title:"LookThatCats",
-text:"Look at this cute cat!",
-url:url
-
-})
-
-}else{
-
-window.open(
-
-"https://twitter.com/intent/tweet?text=Look at this cute cat!&url="+url,
-"_blank"
-
-)
-
-}
+document.getElementById("dailycat").src=url
 
 }
 
 loadBattle()
-loadTopCats()
-loadCatOfDay()
-updateLeaderboard()
 
-  function loadImage(img,url){
+loadTop()
 
-img.classList.remove("loaded")
+loadDaily()
 
-img.onload=()=>{
-
-img.classList.add("loaded")
-
-}
-
-img.src=url
-
-}
-  
 </script>
 
 </body>
-
 </html>
