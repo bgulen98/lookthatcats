@@ -4,12 +4,11 @@
 <head>
 
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width,initial-scale=1">
 
 <title>LookThatCats - Rate Cute Cats</title>
 
-<meta name="description" content="Rate cute cats, discover the Cat of the Day and share adorable cats with friends.">
-<meta name="theme-color" content="#121212">
+<meta name="description" content="Rate cute cats and discover the cutest cat on the internet.">
 
 <link rel="preconnect" href="https://cdn2.thecatapi.com">
 
@@ -21,8 +20,8 @@ body{
 background:#121212;
 color:white;
 font-family:Arial;
-text-align:center;
 margin:0;
+text-align:center;
 }
 
 h1{
@@ -52,12 +51,18 @@ position:relative;
 }
 
 .cat-card img{
+
 width:220px;
 height:220px;
 object-fit:cover;
 border-radius:12px;
 cursor:pointer;
-transition:0.2s;
+transition:.2s;
+
+}
+
+.cat-card img:hover{
+transform:scale(1.03);
 }
 
 .cat-card img.selected{
@@ -65,54 +70,26 @@ border:4px solid hotpink;
 }
 
 .share{
+
 position:absolute;
 top:8px;
 right:8px;
-display:none;
-}
 
-.cat-card.selected .share{
-display:block;
 }
 
 .share button{
-background:#000;
+
+background:black;
 color:white;
 border:none;
-padding:6px;
+padding:6px 8px;
 border-radius:6px;
 cursor:pointer;
-}
 
-.share-menu{
-display:none;
-position:absolute;
-top:35px;
-right:0;
-background:#222;
-padding:10px;
-border-radius:8px;
-min-width:160px;
-}
-
-.share-menu a{
-display:block;
-color:white;
-text-decoration:none;
-padding:6px 4px;
-border-bottom:1px solid #333;
-font-size:14px;
-}
-
-.share-menu a:last-child{
-border-bottom:none;
-}
-
-.share-menu a:hover{
-color:#ff69b4;
 }
 
 .vote-buttons button{
+
 margin:5px;
 padding:8px 12px;
 border:none;
@@ -120,62 +97,94 @@ background:#333;
 color:white;
 border-radius:6px;
 cursor:pointer;
+
 }
 
 .vote-buttons button:hover{
+
 background:#555;
+
 }
 
 .top-cat-grid{
+
 display:grid;
 grid-template-columns:repeat(auto-fit,minmax(100px,1fr));
 gap:10px;
 padding:20px;
+
 }
 
 .top-cat-grid img{
+
 width:100px;
 height:100px;
 object-fit:cover;
 border-radius:10px;
-}
 
-#catOfDay img{
-width:200px;
-border-radius:12px;
 }
 
 .catday-title{
-font-family:'Pacifico', cursive;
+
+font-family:'Pacifico',cursive;
 color:#ff69b4;
 font-size:28px;
+
 }
 
-.vote-effect{
-animation:flash 0.6s ease;
+#catOfDay img{
+
+width:200px;
+border-radius:12px;
+
 }
 
-@keyframes flash{
-0%{box-shadow:0 0 0px pink;}
-50%{box-shadow:0 0 25px hotpink;}
-100%{box-shadow:0 0 0px pink;}
+#winEffect{
+
+position:fixed;
+top:45%;
+left:50%;
+transform:translate(-50%,-50%);
+font-size:38px;
+font-weight:bold;
+color:#ff69b4;
+opacity:0;
+transition:opacity .3s;
+pointer-events:none;
+
+}
+
+.leaderboard img{
+
+width:70px;
+height:70px;
+object-fit:cover;
+border-radius:10px;
+margin:5px;
+
 }
 
 footer{
-margin-top:50px;
+
+margin-top:60px;
 padding:20px;
 font-size:14px;
 color:#aaa;
+
 }
 
 footer a{
+
 color:#aaa;
-margin:0 6px;
 text-decoration:none;
+margin:0 6px;
+
 }
 
 footer a:hover{
+
 color:white;
+
 }
 
 </style>
@@ -194,13 +203,11 @@ color:white;
 
 <div class="cat-card">
 
-<img id="cat1" loading="lazy">
+<img id="cat1" loading="lazy" decoding="async">
 
 <div class="share">
 
-<button onclick="toggleShare(this)">Share</button>
-
-<div class="share-menu"></div>
+<button onclick="shareCat('cat1')">Share</button>
 
 </div>
 
@@ -208,13 +215,11 @@ color:white;
 
 <div class="cat-card">
 
-<img id="cat2" loading="lazy">
+<img id="cat2" loading="lazy" decoding="async">
 
 <div class="share">
 
-<button onclick="toggleShare(this)">Share</button>
-
-<div class="share-menu"></div>
+<button onclick="shareCat('cat2')">Share</button>
 
 </div>
 
@@ -224,11 +229,7 @@ color:white;
 
 <div class="vote-buttons">
 
-<button onclick="vote(1)">1</button>
-<button onclick="vote(2)">2</button>
-<button onclick="vote(3)">3</button>
-<button onclick="vote(4)">4</button>
-<button onclick="vote(5)">5</button>
+<button onclick="vote()">Vote</button>
 
 </div>
 
@@ -254,6 +255,18 @@ color:white;
 
 </div>
 
+<div class="divider"></div>
+
+<div class="section">
+
+<h2>Leaderboard</h2>
+
+<div id="leaderboard" class="leaderboard"></div>
+
+</div>
+
+<div id="winEffect"></div>
+
 <footer>
 
 <a href="/about.html">About</a> |
@@ -271,6 +284,12 @@ const KEY="live_fDX7IYEHhfAbsRlNUYMHWpBRLFjjra8l8ixoHazYl93KLEkPHf5yUuV6OhabAb7R
 let selected=null
 let pool=[]
 
+function hash(url){
+
+return btoa(url).slice(0,10)
+
+}
+
 async function getCats(n){
 
 let r=await fetch(API+"?limit="+n,{headers:{'x-api-key':KEY}})
@@ -284,7 +303,9 @@ async function preload(){
 
 if(pool.length<20){
 
-pool=await getCats(30)
+let cats=await getCats(30)
+
+pool=pool.concat(cats)
 
 }
 
@@ -300,11 +321,11 @@ let b=Math.floor(Math.random()*pool.length)
 document.getElementById("cat1").src=pool[a]
 document.getElementById("cat2").src=pool[b]
 
-setupImages()
+setupSelect()
 
 }
 
-function setupImages(){
+function setupSelect(){
 
 document.querySelectorAll(".cat-card img").forEach(img=>{
 
@@ -316,78 +337,157 @@ img.classList.add("selected")
 
 selected=img
 
-buildShare(img)
-
 }
 
 })
 
 }
 
-function vote(score){
+function recordVote(url){
 
-if(!selected){
-alert("Select a cat first")
-return
+let data=JSON.parse(localStorage.getItem("stats")||"{}")
+
+let id=hash(url)
+
+if(!data[id]){
+
+data[id]={w:0,v:0,url:url}
+
 }
 
-selected.classList.add("vote-effect")
+data[id].v++
+data[id].w++
+
+if(Object.keys(data).length>200){
+
+delete data[Object.keys(data)[0]]
+
+}
+
+localStorage.setItem("stats",JSON.stringify(data))
+
+return data[id]
+
+}
+
+function vote(){
+
+if(!selected){
+
+alert("Select a cat")
+
+return
+
+}
+
+let stat=recordVote(selected.src)
+
+let rate=Math.round((stat.w/stat.v)*100)
+
+showWin(rate)
+
+updateLeaderboard()
+
+setTimeout(loadBattle,800)
+
+}
+
+function showWin(rate){
+
+let el=document.getElementById("winEffect")
+
+el.innerText=rate+"% WIN RATE!"
+
+el.style.opacity=1
 
 setTimeout(()=>{
 
-selected.classList.remove("vote-effect")
-selected=null
-loadBattle()
+el.style.opacity=0
 
-},600)
+},3000)
 
 }
 
-function toggleShare(btn){
+function updateLeaderboard(){
 
-let menu=btn.nextElementSibling
+let data=JSON.parse(localStorage.getItem("stats")||"{}")
 
-menu.style.display=menu.style.display==="block"?"none":"block"
+let arr=Object.values(data)
 
-}
+arr=arr.filter(x=>x.v>3)
 
-function buildShare(img){
+arr.sort((a,b)=>(b.w/b.v)-(a.w/a.v))
 
-let url=img.src
-let page=location.href
-let text="Look at this cute cat!"
+arr=arr.slice(0,10)
 
-let menu=img.parentElement.querySelector(".share-menu")
+let el=document.getElementById("leaderboard")
 
-menu.innerHTML=`
+el.innerHTML=""
 
-<a href="https://www.facebook.com/sharer/sharer.php?u=${url}" target="_blank">Facebook</a>
+arr.forEach(c=>{
 
-<a href="https://twitter.com/intent/tweet?text=${text}&url=${url}" target="_blank">X</a>
+let img=document.createElement("img")
 
-<a href="https://reddit.com/submit?url=${url}&title=${text}" target="_blank">Reddit</a>
+img.src=c.url
 
-<a href="https://wa.me/?text=${text}%20${url}" target="_blank">WhatsApp</a>
+img.loading="lazy"
 
-<a href="${url}" download>Download for Instagram Story</a>
+el.appendChild(img)
 
-`
+})
 
 }
 
 async function loadTopCats(){
 
+let saved=localStorage.getItem("topcats")
+
+let now=new Date()
+
+let week=Math.floor(now.getTime()/604800000)
+
+if(saved){
+
+let data=JSON.parse(saved)
+
+if(data.week===week){
+
+renderTopCats(data.urls)
+
+return
+
+}
+
+}
+
 let urls=await getCats(10)
 
-let c=document.getElementById("topCats")
+localStorage.setItem("topcats",JSON.stringify({
 
-c.innerHTML=""
+week:week,
+urls:urls
+
+}))
+
+renderTopCats(urls)
+
+}
+
+function renderTopCats(urls){
+
+let el=document.getElementById("topCats")
+
+el.innerHTML=""
 
 urls.forEach(u=>{
-let i=document.createElement("img")
-i.src=u
-i.loading="lazy"
-c.appendChild(i)
+
+let img=document.createElement("img")
+
+img.src=u
+img.loading="lazy"
+
+el.appendChild(img)
+
 })
 
 }
@@ -412,27 +512,59 @@ return
 
 }
 
-let u=(await getCats(1))[0]
+let url=(await getCats(1))[0]
 
-localStorage.setItem("catday",JSON.stringify({date:today,url:u}))
+localStorage.setItem("catday",JSON.stringify({
 
-renderCatDay(u)
+date:today,
+url:url
+
+}))
+
+renderCatDay(url)
 
 }
 
-function renderCatDay(u){
+function renderCatDay(url){
 
-let c=document.getElementById("catOfDay")
+document.getElementById("catOfDay").innerHTML=`<img src="${url}" loading="lazy">`
 
-c.innerHTML=`<img src="${u}" loading="lazy">`
+}
+
+function shareCat(id){
+
+let url=document.getElementById(id).src
+
+if(navigator.share){
+
+navigator.share({
+
+title:"LookThatCats",
+text:"Look at this cute cat!",
+url:url
+
+})
+
+}else{
+
+window.open(
+
+"https://twitter.com/intent/tweet?text=Look at this cute cat!&url="+url,
+"_blank"
+
+)
+
+}
 
 }
 
 loadBattle()
 loadTopCats()
 loadCatOfDay()
+updateLeaderboard()
 
 </script>
 
 </body>
+
 </html>
