@@ -195,13 +195,18 @@
       border-radius:22px;
       padding:14px;
       cursor:pointer;
-      transition:transform .18s ease, border-color .18s ease, box-shadow .18s ease;
+      transition:transform .18s ease, border-color .18s ease, box-shadow .18s ease, opacity .18s ease;
     }
 
     .cat-choice:hover{
       transform:translateY(-2px);
       border-color:#4b4b4b;
       box-shadow:0 12px 28px rgba(0,0,0,.3);
+    }
+
+    .cat-choice.disabled{
+      pointer-events:none;
+      opacity:.55;
     }
 
     .cat-choice img{
@@ -246,6 +251,14 @@
       color:#ffd6ea;
       margin:0 auto;
       box-shadow:0 10px 20px rgba(0,0,0,.18);
+    }
+
+    .loading-note{
+      margin-top:14px;
+      color:#ffb7d8;
+      font-size:14px;
+      min-height:20px;
+      text-align:center;
     }
 
     .explosion{
@@ -436,30 +449,20 @@
         grid-template-columns:1fr;
         gap:14px;
       }
+
       .vs-pill{
         width:72px;
         height:72px;
       }
+
       .main-panel{
         padding:16px;
       }
+
       .panel-title{
         font-size:20px;
       }
     }
-
-    .cat-choice.disabled{
-  pointer-events:none;
-  opacity:.55;
-}
-
-.loading-note{
-  margin-top:14px;
-  color:#ffb7d8;
-  font-size:14px;
-  min-height:20px;
-}
-    
   </style>
 </head>
 <body>
@@ -500,8 +503,6 @@
             <div class="hint">Tap to advance this cutie</div>
           </div>
 
-          <div id="loadingNote" class="loading-note"></div>
-
           <div class="vs-pill">VS</div>
 
           <div class="cat-choice" id="choiceB">
@@ -510,6 +511,8 @@
             <div class="hint">Only one moves on</div>
           </div>
         </div>
+
+        <div id="loadingNote" class="loading-note"></div>
 
         <div class="result-box" id="resultBox">
           <h3 class="winner-title">Your Champion</h3>
@@ -538,13 +541,13 @@
   <div class="explosion" id="explosion"></div>
 
   <script>
-    let isVoting = false;
     let rounds = [];
     let currentRoundIndex = 0;
     let currentMatchIndex = 0;
     let currentPair = null;
     let completedMatches = 0;
     let tournamentDate = "";
+    let isVoting = false;
     const TOTAL_MATCHES = 31;
 
     function roundName(size) {
@@ -574,6 +577,12 @@
       img.classList.remove("loaded");
       img.onload = () => img.classList.add("loaded");
       img.src = url;
+    }
+
+    function setBattleDisabled(disabled, message = "") {
+      document.getElementById("choiceA").classList.toggle("disabled", disabled);
+      document.getElementById("choiceB").classList.toggle("disabled", disabled);
+      document.getElementById("loadingNote").textContent = message;
     }
 
     function showExplosion(rate) {
@@ -639,74 +648,73 @@
       updateProgress();
       setBattleDisabled(false, "");
       isVoting = false;
-      
     }
 
     async function nextMatch(winnerCat) {
-  if (isVoting) return;
+      if (isVoting) return;
 
-  isVoting = true;
-  setBattleDisabled(true, "Saving your pick...");
+      isVoting = true;
+      setBattleDisabled(true, "Saving your pick...");
 
-  const loserCat = currentPair[0].id === winnerCat.id ? currentPair[1] : currentPair[0];
+      const loserCat = currentPair[0].id === winnerCat.id ? currentPair[1] : currentPair[0];
 
-  try {
-    const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 10000);
+      try {
+        const controller = new AbortController();
+        const timeout = setTimeout(() => controller.abort(), 10000);
 
-    const res = await fetch("/api/tournament/vote", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({
-        date: tournamentDate,
-        winnerId: winnerCat.id,
-        loserId: loserCat.id
-      }),
-      signal: controller.signal
-    });
+        const res = await fetch("/api/tournament/vote", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+            date: tournamentDate,
+            winnerId: winnerCat.id,
+            loserId: loserCat.id
+          }),
+          signal: controller.signal
+        });
 
-    clearTimeout(timeout);
+        clearTimeout(timeout);
 
-    const data = await res.json();
+        const data = await res.json();
 
-    if (!res.ok || !data.winner) {
-      throw new Error("Vote failed");
-    }
+        if (!res.ok || !data.winner) {
+          throw new Error("Vote failed");
+        }
 
-    const stat = data.winner;
-    const rate = Math.round((stat.w / stat.v) * 100);
+        const stat = data.winner;
+        const rate = Math.round((stat.w / stat.v) * 100);
 
-    await fetchLeaderboard();
-    showExplosion(rate);
+        await fetchLeaderboard();
+        showExplosion(rate);
 
-    const nextRoundIndex = currentRoundIndex + 1;
-    if (!rounds[nextRoundIndex]) rounds[nextRoundIndex] = [];
-    rounds[nextRoundIndex].push(winnerCat);
+        const nextRoundIndex = currentRoundIndex + 1;
+        if (!rounds[nextRoundIndex]) rounds[nextRoundIndex] = [];
+        rounds[nextRoundIndex].push(winnerCat);
 
-    completedMatches += 1;
+        completedMatches += 1;
 
-    setTimeout(() => {
-      currentMatchIndex += 2;
-      const currentRound = rounds[currentRoundIndex];
+        setTimeout(() => {
+          currentMatchIndex += 2;
+          const currentRound = rounds[currentRoundIndex];
 
-      if (currentMatchIndex >= currentRound.length) {
-        currentRoundIndex += 1;
-        currentMatchIndex = 0;
+          if (currentMatchIndex >= currentRound.length) {
+            currentRoundIndex += 1;
+            currentMatchIndex = 0;
+          }
+
+          renderCurrentMatch();
+          setBattleDisabled(false, "");
+          isVoting = false;
+        }, 450);
+
+      } catch (err) {
+        console.error(err);
+        setBattleDisabled(false, "Connection issue. Please tap again.");
+        isVoting = false;
       }
-
-      renderCurrentMatch();
-      setBattleDisabled(false, "");
-      isVoting = false;
-    }, 450);
-
-  } catch (err) {
-    console.error(err);
-    setBattleDisabled(false, "Connection issue. Please tap again.");
-    isVoting = false;
-  }
-}
+    }
 
     function renderWinner(cat) {
       document.getElementById("battleArea").style.display = "none";
@@ -744,9 +752,11 @@
       currentMatchIndex = 0;
       currentPair = null;
       completedMatches = 0;
+      isVoting = false;
 
       document.getElementById("battleArea").style.display = "grid";
       document.getElementById("resultBox").classList.remove("show");
+      document.getElementById("loadingNote").textContent = "";
 
       renderCurrentMatch();
     }
@@ -770,13 +780,6 @@
       startTournament(data.cats);
       await fetchLeaderboard();
     })();
-
-    function setBattleDisabled(disabled, message = "") {
-  document.getElementById("choiceA").classList.toggle("disabled", disabled);
-  document.getElementById("choiceB").classList.toggle("disabled", disabled);
-  document.getElementById("loadingNote").textContent = message;
-}
-    
   </script>
 </body>
 </html>
