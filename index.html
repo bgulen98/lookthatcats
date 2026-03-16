@@ -26,23 +26,25 @@
     height: 200px;
     object-fit: cover;
     border-radius: 10px;
-    transition: transform 0.3s;
+    transition: transform 0.3s, border 0.3s;
     cursor: pointer;
   }
-  .container img:hover { transform: scale(1.05); }
-  #nextBtn {
-    padding: 10px 20px;
+  .container img.selected {
+    border: 5px solid pink;
+  }
+  .vote-buttons button {
+    margin: 0 5px;
+    padding: 5px 10px;
     background-color: #1f1f1f;
     color: #eee;
     border: none;
     border-radius: 5px;
     cursor: pointer;
-    margin-bottom: 30px;
-    font-size: 18px;
   }
-  #topCatsContainer {
-    margin-top: 40px;
+  .vote-buttons button:hover {
+    background-color: #333;
   }
+  #topCatsContainer { margin-top: 40px; }
   #topCatsContainer h2 { margin-bottom: 10px; }
   .top-cat-grid {
     display: grid;
@@ -93,10 +95,17 @@
 <h1>LookThatCats 🐱</h1>
 
 <div class="container">
-  <img id="cat1" src="" alt="Cat 1">
-  <img id="cat2" src="" alt="Cat 2">
+  <img id="cat1" src="" alt="Cat 1" loading="lazy">
+  <img id="cat2" src="" alt="Cat 2" loading="lazy">
 </div>
-<button id="nextBtn">Next Battle 🐾</button>
+
+<div class="vote-buttons">
+  <button data-score="1">1</button>
+  <button data-score="2">2</button>
+  <button data-score="3">3</button>
+  <button data-score="4">4</button>
+  <button data-score="5">5</button>
+</div>
 
 <div id="topCatsContainer">
   <h2>Today's Top Cats</h2>
@@ -108,34 +117,61 @@
 <script>
 const API_KEY = "live_fDX7IYEHhfAbsRlNUYMHWpBRLFjjra8l8ixoHazYl93KLEkPHf5yUuV6OhabAb7R";
 
-// Rastgele 2 battle kedisi yükle
-async function loadBattleCats() {
-  const res1 = await fetch("https://api.thecatapi.com/v1/images/search", {
-    headers: {'x-api-key': API_KEY}
-  });
-  const cat1 = await res1.json();
-  document.getElementById("cat1").src = cat1[0].url;
+// Battle kedileri önbelleği
+let battlePool = [];
+let selectedCat = null;
 
-  const res2 = await fetch("https://api.thecatapi.com/v1/images/search", {
+// Kediyi seç
+document.querySelectorAll('#cat1, #cat2').forEach(img => {
+  img.addEventListener('click', () => {
+    if (selectedCat) selectedCat.classList.remove('selected');
+    img.classList.add('selected');
+    selectedCat = img;
+  });
+});
+
+// Puanlama butonları
+document.querySelectorAll('.vote-buttons button').forEach(btn => {
+  btn.addEventListener('click', async () => {
+    if (!selectedCat) return alert("Select a cat first!");
+    const score = btn.dataset.score;
+    alert(`You gave ${score} points to the selected cat!`);
+    selectedCat.classList.remove('selected');
+    selectedCat = null;
+    await loadBattleCats();
+  });
+});
+
+// Battle kedilerini yükleme
+async function preloadBattleCats() {
+  if (battlePool.length >= 10) return;
+  const res = await fetch("https://api.thecatapi.com/v1/images/search?limit=20", {
     headers: {'x-api-key': API_KEY}
   });
-  const cat2 = await res2.json();
-  document.getElementById("cat2").src = cat2[0].url;
+  const data = await res.json();
+  battlePool = data.map(d => d.url);
+}
+
+async function loadBattleCats() {
+  await preloadBattleCats();
+  const idx1 = Math.floor(Math.random() * battlePool.length);
+  let idx2;
+  do { idx2 = Math.floor(Math.random() * battlePool.length); } while(idx2 === idx1);
+  document.getElementById("cat1").src = battlePool[idx1];
+  document.getElementById("cat2").src = battlePool[idx2];
 }
 
 // Top 10 kediyi 24 saatte bir yenile
 async function loadTopCats() {
-  const today = new Date().toISOString().slice(0,10); // YYYY-MM-DD
+  const today = new Date().toISOString().slice(0,10);
   let saved = JSON.parse(localStorage.getItem("topCatsData"));
   if (!saved || saved.date !== today) {
-    const topCats = [];
-    for (let i=0;i<10;i++){
-      const res = await fetch("https://api.thecatapi.com/v1/images/search", {
-        headers: {'x-api-key': API_KEY}
-      });
-      const data = await res.json();
-      topCats.push(data[0].url);
-    }
+    const topPromises = Array.from({length:10},()=> 
+      fetch("https://api.thecatapi.com/v1/images/search", {headers:{'x-api-key': API_KEY}})
+        .then(res => res.json())
+        .then(data => data[0].url)
+    );
+    const topCats = await Promise.all(topPromises);
     localStorage.setItem("topCatsData", JSON.stringify({date: today, urls: topCats}));
     saved = {date: today, urls: topCats};
   }
@@ -144,6 +180,7 @@ async function loadTopCats() {
   saved.urls.forEach(url=>{
     const img = document.createElement("img");
     img.src = url;
+    img.loading = "lazy";
     container.appendChild(img);
   });
 }
@@ -151,9 +188,6 @@ async function loadTopCats() {
 // Başlangıçta yükle
 loadBattleCats();
 loadTopCats();
-
-// Next Battle butonuna bağla
-document.getElementById("nextBtn").addEventListener("click", loadBattleCats);
 </script>
 
 </body>
