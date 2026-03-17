@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Daily Winner</title>
+
+<style>
+body{background:#121212;color:white;text-align:center;font-family:Arial}
+img{width:300px;border-radius:20px;margin-top:20px}
+</style>
+</head>
+
+<body>
+
+<h1 id="title"></h1>
+<div id="content"></div>
+
+<script>
+const params = new URLSearchParams(window.location.search);
+const date = params.get("date");
+
+fetch("/data/leaderboard-archive.json")
+.then(res=>res.json())
+.then(data=>{
+  const day = data.days.find(d=>d.date===date);
+  if(!day) return;
+
+  document.getElementById("title").innerText = day.title;
+
+  const content = document.getElementById("content");
+
+  day.winners.forEach(cat=>{
+    const div = document.createElement("div");
+    div.innerHTML = `
+      <h3>#${cat.rank}</h3>
+      <img src="${cat.image}">
+      <p>${cat.votes || ""} votes</p>
+    `;
+    content.appendChild(div);
+  });
+});
+</script>
+
+</body>
+</html>
