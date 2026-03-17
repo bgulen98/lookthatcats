@@ -736,7 +736,7 @@
 
   <div class="explosion" id="explosion"></div>
 
-  <script>
+<script>
 let rounds = [];
 let currentRoundIndex = 0;
 let currentMatchIndex = 0;
@@ -795,30 +795,11 @@ function unlockChoices(message = "") {
   isAdvancing = false;
 }
 
-function safeSetImage(img, url) {
+function setImageNow(img, url) {
   img.classList.remove("loaded");
-
-  return new Promise((resolve) => {
-    let done = false;
-
-    const finish = () => {
-      if (done) return;
-      done = true;
-      img.classList.add("loaded");
-      resolve();
-    };
-
-    if (img.src === url && img.complete) {
-      requestAnimationFrame(finish);
-      return;
-    }
-
-    img.onload = finish;
-    img.onerror = finish;
-    img.src = url;
-
-    setTimeout(finish, 1200);
-  });
+  img.onload = () => img.classList.add("loaded");
+  img.onerror = () => img.classList.add("loaded");
+  img.src = url;
 }
 
 function showExplosion(rate) {
@@ -913,11 +894,11 @@ function hideRoundTransition() {
   document.getElementById("battleArea").style.display = "grid";
 }
 
-async function renderCurrentMatch() {
+function renderCurrentMatch() {
   const round = rounds[currentRoundIndex];
 
   if (!round || round.length === 1) {
-    await renderWinner(round[0]);
+    renderWinner(round[0]);
     return;
   }
 
@@ -925,16 +906,14 @@ async function renderCurrentMatch() {
   hideRoundTransition();
   lockChoices("Loading next matchup...");
 
-  const imgA = document.getElementById("catA");
-  const imgB = document.getElementById("catB");
-
-  await Promise.all([
-    safeSetImage(imgA, currentPair[0].url),
-    safeSetImage(imgB, currentPair[1].url)
-  ]);
+  setImageNow(document.getElementById("catA"), currentPair[0].url);
+  setImageNow(document.getElementById("catB"), currentPair[1].url);
 
   updateProgress();
-  unlockChoices("");
+
+  requestAnimationFrame(() => {
+    unlockChoices("");
+  });
 }
 
 function nextMatch(winnerCat) {
@@ -960,7 +939,7 @@ function nextMatch(winnerCat) {
 
   if (transitionTimer) clearTimeout(transitionTimer);
 
-  transitionTimer = setTimeout(async () => {
+  transitionTimer = setTimeout(() => {
     currentMatchIndex += 2;
     const finishedRound = currentMatchIndex >= currentRound.length;
 
@@ -972,10 +951,10 @@ function nextMatch(winnerCat) {
       if (upcomingRound && upcomingRound.length > 1) {
         showRoundTransition(upcomingRound.length);
       } else {
-        await renderCurrentMatch();
+        renderCurrentMatch();
       }
     } else {
-      await renderCurrentMatch();
+      renderCurrentMatch();
     }
   }, 220);
 }
@@ -1158,8 +1137,8 @@ document.getElementById("choiceB").addEventListener("click", () => {
   if (currentPair) nextMatch(currentPair[1]);
 });
 
-document.getElementById("continueRoundBtn").addEventListener("click", async () => {
-  await renderCurrentMatch();
+document.getElementById("continueRoundBtn").addEventListener("click", () => {
+  renderCurrentMatch();
 });
 
 document.getElementById("restartBtn").addEventListener("click", async () => {
@@ -1173,6 +1152,7 @@ document.getElementById("restartBtn").addEventListener("click", async () => {
   startTournament(data.cats);
   await fetchLeaderboard();
 })();
+  
 </script>
   
 </body>
