@@ -5,369 +5,659 @@
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
 
 <title>LookThatCats - Daily Cat Tournament</title>
-
-<meta name="description" content="Vote for the cutest cats and play the daily cat tournament on LookThatCats.">
-<meta name="keywords" content="cute cats, cat voting game, cat tournament, funny cats">
+<meta name="description" content="Vote for the cutest cats, discover the cat of the day, and play the daily cat tournament on LookThatCats.">
+<meta name="keywords" content="cute cats, cat tournament, cat voting game, daily cat game, funny cats, cat battle, cat of the day, viral cat site">
 <meta name="robots" content="index,follow">
+<meta name="theme-color" content="#121212">
+
+<meta property="og:title" content="LookThatCats - Daily Cat Tournament">
+<meta property="og:description" content="Vote for the cutest cats and play the daily cat tournament.">
+<meta property="og:type" content="website">
+<meta property="og:image" content="/pink-cat-logo.svg">
+<meta property="og:url" content="https://www.lookthatcats.vip/">
+
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="LookThatCats - Daily Cat Tournament">
+<meta name="twitter:description" content="Vote for the cutest cats and play the daily cat tournament.">
+<meta name="twitter:image" content="/pink-cat-logo.svg">
 
 <link rel="icon" type="image/svg+xml" href="/pink-cat-logo.svg?v=2">
-
-<link href="https://fonts.googleapis.com/css2?family=Pacifico&family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Pacifico&family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
 
 <style>
+:root{
+  --bg:#121212;
+  --panel:#1b1b1b;
+  --panel-2:#202020;
+  --text:#ffffff;
+  --muted:#aaaaaa;
+  --line:#2a2a2a;
+  --pink:#ff69b4;
+  --pink-soft:#ff95cb;
+  --pink-glow:rgba(255,105,180,.18);
+  --shadow:0 14px 34px rgba(0,0,0,.28);
+}
+
+*{
+  box-sizing:border-box;
+}
 
 body{
-background:#121212;
-color:white;
-font-family:Inter,Arial;
-margin:0;
-text-align:center;
+  background:
+    radial-gradient(circle at top, rgba(255,105,180,.08), transparent 28%),
+    linear-gradient(180deg, #141414 0%, #111111 100%);
+  color:var(--text);
+  font-family:Inter, Arial, sans-serif;
+  margin:0;
+  text-align:center;
 }
 
 .page{
-max-width:1200px;
-margin:0 auto;
-padding:25px 20px 60px;
+  max-width:1200px;
+  margin:0 auto;
+  padding:24px 16px 60px;
 }
 
 .logo{
-display:flex;
-align-items:center;
-justify-content:center;
-gap:12px;
-font-size:34px;
-font-weight:800;
-color:#ff69b4;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:12px;
+  font-size:34px;
+  font-weight:800;
+  color:var(--pink);
 }
 
 .logo img{
-width:60px;
-height:60px;
+  width:60px;
+  height:60px;
+  filter:drop-shadow(0 0 10px rgba(255,105,180,.18));
 }
 
 .subtitle{
-color:#aaa;
-margin-top:10px;
+  color:var(--muted);
+  margin-top:10px;
+  font-size:15px;
+}
+
+.hero-chips{
+  display:flex;
+  justify-content:center;
+  gap:10px;
+  flex-wrap:wrap;
+  margin-top:14px;
+}
+
+.hero-chip{
+  padding:8px 12px;
+  border-radius:999px;
+  background:rgba(255,255,255,.03);
+  border:1px solid rgba(255,255,255,.05);
+  color:#ffd7ea;
+  font-size:13px;
 }
 
 .tournament-btn{
-margin-top:20px;
-padding:12px 22px;
-background:linear-gradient(90deg,#ff69b4,#ff95cb);
-border:none;
-border-radius:999px;
-font-weight:800;
-cursor:pointer;
+  margin-top:22px;
+  padding:13px 24px;
+  background:linear-gradient(90deg,var(--pink),var(--pink-soft));
+  border:none;
+  border-radius:999px;
+  font-weight:800;
+  color:#1a1a1a;
+  cursor:pointer;
+  box-shadow:0 12px 26px rgba(0,0,0,.22);
+  transition:transform .18s ease, box-shadow .18s ease;
+}
+
+.tournament-btn:hover{
+  transform:translateY(-1px);
+  box-shadow:0 16px 28px rgba(0,0,0,.26);
 }
 
 .section{
-margin-top:50px;
+  margin-top:52px;
+}
+
+.section-title{
+  margin:0 0 10px;
+  font-size:30px;
+  font-weight:800;
+}
+
+.section-sub{
+  color:var(--muted);
+  font-size:14px;
+  margin-bottom:24px;
 }
 
 .line{
-width:80%;
-height:1px;
-background:#2a2a2a;
-margin:50px auto;
+  width:80%;
+  height:1px;
+  background:var(--line);
+  margin:52px auto;
 }
 
-.battle{
-display:flex;
-justify-content:center;
-gap:40px;
-margin-top:30px;
-flex-wrap:wrap;
-}
-
-.cat-card{
-background:#1b1b1b;
-padding:15px;
-border-radius:20px;
-}
-
-.cat-card img{
-width:280px;
-height:280px;
-object-fit:cover;
-border-radius:14px;
-cursor:pointer;
-opacity:0;
-transition:opacity .25s;
-}
-
-.cat-card img.loaded{
-opacity:1;
-}
-
-.heart{
-font-size:70px;
-cursor:pointer;
-margin-top:18px;
-display:inline-block;
-transition:transform .2s;
-}
-
-.heart:hover{
-transform:scale(1.15);
-}
-
-.heart.pop{
-animation:heartPop .4s;
-}
-
-@keyframes heartPop{
-0%{transform:scale(1)}
-50%{transform:scale(1.6)}
-100%{transform:scale(1)}
+.battle-wrap{
+  background:linear-gradient(180deg, rgba(255,255,255,.025), rgba(255,255,255,.01));
+  border:1px solid rgba(255,255,255,.05);
+  border-radius:26px;
+  padding:26px 18px 22px;
+  box-shadow:var(--shadow);
 }
 
 .emoji-battle{
-font-size:40px;
-margin-top:20px;
+  font-size:40px;
+  margin-bottom:18px;
+  letter-spacing:.04em;
+  text-shadow:0 0 18px rgba(255,105,180,.14);
 }
 
-.topcats{
-display:flex;
-justify-content:center;
-gap:15px;
-flex-wrap:wrap;
+.battle{
+  display:flex;
+  justify-content:center;
+  align-items:flex-start;
+  gap:34px;
+  margin-top:6px;
+  flex-wrap:wrap;
 }
-
-.topcats img{
-width:120px;
-height:120px;
-border-radius:12px;
-object-fit:cover;
-}
-
-.daily img{
-width:200px;
-border-radius:16px;
-}
-
-.footer{
-margin-top:60px;
-padding:30px 20px;
-text-align:center;
-color:#888;
-}
-
-.footer-links{
-display:flex;
-justify-content:center;
-gap:18px;
-flex-wrap:wrap;
-margin-bottom:10px;
-}
-
-.footer-links a{
-color:#aaa;
-text-decoration:none;
-}
-
-.footer-links a:hover{
-color:white;
-}
-
 
 .cat-card{
-display:flex;
-flex-direction:column;
-align-items:center;
-justify-content:center;
+  background:var(--panel);
+  padding:18px;
+  border-radius:22px;
+  width:320px;
+  max-width:100%;
+  box-shadow:0 12px 30px rgba(0,0,0,.22);
+  border:1px solid rgba(255,255,255,.04);
+  transition:transform .18s ease, border-color .18s ease, box-shadow .18s ease;
 }
 
-.heart{
-display:block;
-margin-top:16px;
-font-size:70px;
+.cat-card:hover{
+  transform:translateY(-2px);
+  border-color:rgba(255,105,180,.14);
+  box-shadow:0 16px 36px rgba(0,0,0,.26);
 }
 
-
-@media (max-width:640px){
-
-.cat-card{
-flex-direction:row;
-align-items:center;
-gap:14px;
+.cat-frame{
+  width:100%;
+  aspect-ratio:1/1;
+  padding:10px;
+  background:#171717;
+  border-radius:18px;
+  overflow:hidden;
 }
 
 .cat-card img{
-width:42vw;
-height:42vw;
-max-width:260px;
-max-height:260px;
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  object-position:center;
+  border-radius:14px;
+  cursor:pointer;
+  opacity:0;
+  transition:opacity .25s ease, transform .2s ease;
+  background:#1f1f1f;
+  display:block;
+}
+
+.cat-card img.loaded{
+  opacity:1;
+}
+
+.cat-card img:hover{
+  transform:scale(1.02);
 }
 
 .heart{
-margin-top:0;
-font-size:56px;
+  font-size:74px;
+  cursor:pointer;
+  margin-top:18px;
+  display:block;
+  transition:transform .2s ease, filter .2s ease;
+  line-height:1;
+  user-select:none;
+  filter:drop-shadow(0 0 12px rgba(255,105,180,.14));
 }
 
+.heart:hover{
+  transform:scale(1.12);
+  filter:drop-shadow(0 0 16px rgba(255,105,180,.22));
 }
 
-  
+.heart.pop{
+  animation:heartPop .42s ease;
+}
+
+@keyframes heartPop{
+  0%{transform:scale(1)}
+  50%{transform:scale(1.45)}
+  100%{transform:scale(1)}
+}
+
+.mini-spark{
+  color:#ffd7ea;
+  font-size:13px;
+  margin-top:4px;
+}
+
+.topcats-wrap{
+  background:linear-gradient(180deg, rgba(255,255,255,.02), rgba(255,255,255,.01));
+  border:1px solid rgba(255,255,255,.05);
+  border-radius:24px;
+  padding:24px 18px;
+  box-shadow:var(--shadow);
+}
+
+.topcats{
+  display:flex;
+  justify-content:center;
+  gap:15px;
+  flex-wrap:wrap;
+}
+
+.topcat-item{
+  width:120px;
+  transition:transform .18s ease;
+}
+
+.topcat-item:hover{
+  transform:translateY(-2px);
+}
+
+.topcat-item img{
+  width:120px;
+  height:120px;
+  border-radius:14px;
+  object-fit:cover;
+  cursor:pointer;
+  display:block;
+  box-shadow:0 10px 24px rgba(0,0,0,.2);
+}
+
+.topcat-label{
+  margin-top:8px;
+  color:#c9c9c9;
+  font-size:12px;
+}
+
+.daily-wrap{
+  background:linear-gradient(180deg, rgba(255,255,255,.025), rgba(255,255,255,.01));
+  border:1px solid rgba(255,255,255,.05);
+  border-radius:26px;
+  padding:28px 18px;
+  box-shadow:var(--shadow);
+}
+
+.daily-title{
+  color:var(--pink);
+  font-family:Pacifico, cursive;
+  font-weight:400;
+  font-size:38px;
+  margin:0 0 10px;
+  text-shadow:0 0 18px rgba(255,105,180,.12);
+}
+
+.daily-sub{
+  color:var(--muted);
+  font-size:14px;
+  margin-bottom:18px;
+}
+
+.daily img{
+  width:min(720px, 92%);
+  max-width:100%;
+  aspect-ratio:1/1;
+  object-fit:cover;
+  object-position:center;
+  border-radius:24px;
+  cursor:pointer;
+  display:block;
+  margin:0 auto;
+  box-shadow:0 18px 36px rgba(0,0,0,.28);
+  border:2px solid rgba(255,255,255,.05);
+  transition:transform .18s ease;
+}
+
+.daily img:hover{
+  transform:scale(1.01);
+}
+
+.footer{
+  margin-top:60px;
+  padding:30px 20px;
+  text-align:center;
+  color:#888;
+}
+
+.footer-links{
+  display:flex;
+  justify-content:center;
+  gap:18px;
+  flex-wrap:wrap;
+  margin-bottom:10px;
+}
+
+.footer-links a{
+  color:#aaa;
+  text-decoration:none;
+}
+
+.footer-links a:hover{
+  color:white;
+}
+
+.footer-copy{
+  color:#777;
+}
+
+/* image modal */
+.image-modal{
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,.82);
+  display:none;
+  align-items:center;
+  justify-content:center;
+  padding:20px;
+  z-index:9999;
+  backdrop-filter:blur(6px);
+}
+
+.image-modal.show{
+  display:flex;
+}
+
+.image-modal img{
+  max-width:min(1100px, 94vw);
+  max-height:88vh;
+  width:auto;
+  height:auto;
+  border-radius:22px;
+  box-shadow:0 20px 50px rgba(0,0,0,.4);
+  border:2px solid rgba(255,255,255,.06);
+}
+
+.image-modal-hint{
+  position:absolute;
+  bottom:18px;
+  left:50%;
+  transform:translateX(-50%);
+  color:#e0e0e0;
+  font-size:13px;
+  background:rgba(255,255,255,.06);
+  padding:8px 12px;
+  border-radius:999px;
+}
+
+/* playful subtle floating accents */
+.floating-accent{
+  position:absolute;
+  width:10px;
+  height:10px;
+  border-radius:999px;
+  background:rgba(255,105,180,.12);
+  filter:blur(1px);
+  animation:floaty 5s ease-in-out infinite;
+}
+
+.floating-accent.a1{top:110px;left:10%;}
+.floating-accent.a2{top:190px;right:12%;animation-delay:1s;}
+.floating-accent.a3{top:520px;left:16%;animation-delay:2s;}
+.floating-accent.a4{top:900px;right:18%;animation-delay:1.5s;}
+
+@keyframes floaty{
+  0%{transform:translateY(0)}
+  50%{transform:translateY(-8px)}
+  100%{transform:translateY(0)}
+}
+
+@media (max-width:800px){
+  .cat-card{
+    width:100%;
+    max-width:420px;
+  }
+
+  .daily-title{
+    font-size:34px;
+  }
+}
+
+@media (max-width:640px){
+  .logo{
+    font-size:28px;
+  }
+
+  .logo img{
+    width:50px;
+    height:50px;
+  }
+
+  .emoji-battle{
+    font-size:34px;
+  }
+
+  .cat-card{
+    padding:14px;
+  }
+
+  .cat-frame{
+    padding:8px;
+  }
+
+  .cat-card img{
+    min-height:220px;
+  }
+
+  .heart{
+    font-size:62px;
+  }
+
+  .topcat-item,
+  .topcat-item img{
+    width:105px;
+    height:105px;
+  }
+
+  .daily img{
+    width:100%;
+  }
+}
 </style>
 </head>
 
 <body>
-
 <div class="page">
 
-<div class="logo">
-<img src="/pink-cat-logo.svg">
-<span>LookThatCats</span>
+  <div class="floating-accent a1"></div>
+  <div class="floating-accent a2"></div>
+  <div class="floating-accent a3"></div>
+  <div class="floating-accent a4"></div>
+
+  <div class="logo">
+    <img src="/pink-cat-logo.svg" alt="LookThatCats logo">
+    <span>LookThatCats</span>
+  </div>
+
+  <div class="subtitle">Vote cute cats, discover today’s favorites, and play the daily bracket.</div>
+
+  <div class="hero-chips">
+    <div class="hero-chip">🐾 Cute battle</div>
+    <div class="hero-chip">💖 Daily favorite</div>
+    <div class="hero-chip">🏆 32-cat tournament</div>
+  </div>
+
+  <div style="margin:20px 0 8px;">
+    <a href="/tournament.html" style="text-decoration:none;">
+      <button class="tournament-btn">🏆 Play Daily Cat Tournament</button>
+    </a>
+  </div>
+
+  <div class="section">
+    <div class="battle-wrap">
+      <div id="emojiBattle" class="emoji-battle">🐱 VS 😺</div>
+
+      <div class="battle">
+        <div class="cat-card">
+          <div class="cat-frame">
+            <img id="cat1" alt="Cat 1">
+          </div>
+          <div class="heart" onclick="chooseCat(this)">❤️</div>
+          <div class="mini-spark">tap the cat or the heart</div>
+        </div>
+
+        <div class="cat-card">
+          <div class="cat-frame">
+            <img id="cat2" alt="Cat 2">
+          </div>
+          <div class="heart" onclick="chooseCat(this)">❤️</div>
+          <div class="mini-spark">tap the cat or the heart</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="line"></div>
+
+  <div class="section">
+    <h2 class="section-title">Top 10 Cats</h2>
+    <div class="section-sub">Click any cat to open it in full view.</div>
+
+    <div class="topcats-wrap">
+      <div id="topcats" class="topcats"></div>
+    </div>
+  </div>
+
+  <div class="line"></div>
+
+  <div class="section daily">
+    <div class="daily-wrap">
+      <h2 class="daily-title">Cat Of The Day</h2>
+      <div class="daily-sub">Today’s featured legend. Click to view bigger.</div>
+      <img id="dailycat" alt="Cat of the day">
+    </div>
+  </div>
+
+  <footer class="footer">
+    <div class="footer-links">
+      <a href="/about.html">About</a>
+      <a href="/privacy.html">Privacy</a>
+      <a href="/terms.html">Terms</a>
+      <a href="/contact.html">Contact</a>
+    </div>
+    <div class="footer-copy">© 2026 LookThatCats • Daily Cat Tournament</div>
+  </footer>
+
 </div>
 
-<div class="subtitle">Vote for the cutest cats on the internet.</div>
-
-<a href="/tournament.html">
-<button class="tournament-btn">🏆 Play Daily Cat Tournament</button>
-</a>
-
-<div class="section">
-
-<div id="emojiBattle" class="emoji-battle">🐱 VS 😺</div>
-
-<div class="battle">
-
-<div class="cat-card">
-<img id="cat1">
-<div class="heart" onclick="chooseCat(this)">❤️</div>
-</div>
-
-<div class="cat-card">
-<img id="cat2">
-<div class="heart" onclick="chooseCat(this)">❤️</div>
-</div>
-
-</div>
-
-</div>
-
-<div class="line"></div>
-
-<div class="section">
-
-<h2>Top 10 Cats</h2>
-
-<div id="topcats" class="topcats"></div>
-
-</div>
-
-<div class="line"></div>
-
-<div class="section daily">
-
-<h2 style="color:#ff69b4;font-family:Pacifico;">Cat Of The Day</h2>
-
-<img id="dailycat">
-
-</div>
-
-<footer class="footer">
-
-<div class="footer-links">
-<a href="/about.html">About</a>
-<a href="/privacy.html">Privacy</a>
-<a href="/terms.html">Terms</a>
-<a href="/contact.html">Contact</a>
-</div>
-
-<div>© 2026 LookThatCats • Daily Cat Tournament</div>
-
-</footer>
-
+<div id="imageModal" class="image-modal" onclick="closeImageModal(event)">
+  <img id="imageModalImg" alt="Expanded cat image">
+  <div class="image-modal-hint">tap outside to close</div>
 </div>
 
 <script>
-
-const catEmojis=[
-"🐱 VS 😺",
-"😺 VS 🐈",
-"🐈 VS 🐱",
-"😸 VS 🐱",
-"🐱 VS 😹",
-"😻 VS 🐱"
+const catEmojis = [
+  "🐱 VS 😺",
+  "😺 VS 🐈",
+  "🐈 VS 🐱",
+  "😸 VS 🐱",
+  "🐱 VS 😹",
+  "😻 VS 🐱",
+  "🐾 VS 🐾",
+  "😽 VS 😺"
 ];
 
 function changeEmoji(){
-document.getElementById("emojiBattle").textContent=
-catEmojis[Math.floor(Math.random()*catEmojis.length)];
+  document.getElementById("emojiBattle").textContent =
+    catEmojis[Math.floor(Math.random() * catEmojis.length)];
 }
 
-function loadImage(img,url){
-img.classList.remove("loaded");
-img.onload=()=>img.classList.add("loaded");
-img.src=url;
+function loadImage(img, url){
+  img.classList.remove("loaded");
+  img.onload = () => img.classList.add("loaded");
+  img.onerror = () => img.classList.add("loaded");
+  img.src = url;
 }
 
 async function loadBattle(){
+  const res = await fetch("/api/cats/random");
+  const data = await res.json();
 
-const res=await fetch("/api/cats/random");
-const data=await res.json();
+  loadImage(document.getElementById("cat1"), data[0]);
+  loadImage(document.getElementById("cat2"), data[1]);
 
-loadImage(document.getElementById("cat1"),data[0]);
-loadImage(document.getElementById("cat2"),data[1]);
-
-changeEmoji();
+  changeEmoji();
 }
 
 function chooseCat(el){
+  el.classList.add("pop");
 
-el.classList.add("pop");
-
-setTimeout(()=>{
-
-el.classList.remove("pop");
-
-loadBattle();
-
-},400);
-
+  setTimeout(() => {
+    el.classList.remove("pop");
+    loadBattle();
+  }, 400);
 }
 
-document.getElementById("cat1").onclick=()=>chooseCat(document.querySelectorAll(".heart")[0]);
-document.getElementById("cat2").onclick=()=>chooseCat(document.querySelectorAll(".heart")[1]);
+document.getElementById("cat1").onclick = () => chooseCat(document.querySelectorAll(".heart")[0]);
+document.getElementById("cat2").onclick = () => chooseCat(document.querySelectorAll(".heart")[1]);
 
 async function loadTop(){
+  const res = await fetch("/api/cats/top");
+  const data = await res.json();
 
-const res=await fetch("/api/cats/top");
-const data=await res.json();
+  const container = document.getElementById("topcats");
+  container.innerHTML = "";
 
-const container=document.getElementById("topcats");
+  data.forEach((url, index) => {
+    const wrapper = document.createElement("div");
+    wrapper.className = "topcat-item";
 
-container.innerHTML="";
+    const img = document.createElement("img");
+    img.src = url;
+    img.alt = `Top cat ${index + 1}`;
+    img.loading = "lazy";
+    img.onclick = () => openImageModal(url);
 
-data.forEach(url=>{
+    const label = document.createElement("div");
+    label.className = "topcat-label";
+    label.textContent = `Top pick #${index + 1}`;
 
-const img=document.createElement("img");
-
-img.src=url;
-
-container.appendChild(img);
-
-});
-
+    wrapper.appendChild(img);
+    wrapper.appendChild(label);
+    container.appendChild(wrapper);
+  });
 }
 
 async function loadDaily(){
+  const res = await fetch("/api/cats/daily");
+  const url = await res.json();
 
-const res=await fetch("/api/cats/daily");
+  const img = document.getElementById("dailycat");
+  img.src = url;
+  img.onclick = () => openImageModal(url);
+}
 
-const url=await res.json();
+function openImageModal(url){
+  const modal = document.getElementById("imageModal");
+  const modalImg = document.getElementById("imageModalImg");
+  modalImg.src = url;
+  modal.classList.add("show");
+}
 
-document.getElementById("dailycat").src=url;
+function closeImageModal(event){
+  const modal = document.getElementById("imageModal");
+  const modalImg = document.getElementById("imageModalImg");
 
+  if (event.target === modal) {
+    modal.classList.remove("show");
+    modalImg.src = "";
+  }
 }
 
 loadBattle();
-
 loadTop();
-
 loadDaily();
-
 </script>
-
 </body>
 </html>
