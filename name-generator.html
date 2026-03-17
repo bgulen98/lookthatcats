@@ -1,0 +1,602 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+
+<title>Cat Name Generator - LookThatCats</title>
+<meta name="description" content="Generate a cute cat name based on your cat’s color, eye color, breed, and gender.">
+<meta name="keywords" content="cat name generator, kitten name generator, cute cat names, male cat names, female cat names">
+<meta name="robots" content="index,follow">
+<meta name="theme-color" content="#121212">
+
+<meta property="og:title" content="Cat Name Generator - LookThatCats">
+<meta property="og:description" content="Pick your cat’s traits and generate a cute cat name.">
+<meta property="og:type" content="website">
+<meta property="og:image" content="/pink-cat-logo.svg">
+<meta property="og:url" content="https://www.lookthatcats.vip/name-generator.html">
+
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Cat Name Generator - LookThatCats">
+<meta name="twitter:description" content="Pick your cat’s traits and generate a cute cat name.">
+<meta name="twitter:image" content="/pink-cat-logo.svg">
+
+<link rel="icon" type="image/svg+xml" href="/pink-cat-logo.svg?v=2">
+<link href="https://fonts.googleapis.com/css2?family=Pacifico&family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+
+<style>
+:root{
+  --bg:#121212;
+  --panel:#1b1b1b;
+  --panel-2:#202020;
+  --text:#ffffff;
+  --muted:#aaaaaa;
+  --line:#2a2a2a;
+  --pink:#ff69b4;
+  --pink-soft:#ff95cb;
+  --shadow:0 14px 34px rgba(0,0,0,.28);
+}
+
+*{box-sizing:border-box}
+
+body{
+  margin:0;
+  background:
+    radial-gradient(circle at top, rgba(255,105,180,.08), transparent 28%),
+    linear-gradient(180deg, #141414 0%, #111111 100%);
+  color:var(--text);
+  font-family:Inter, Arial, sans-serif;
+}
+
+.page{
+  max-width:1200px;
+  margin:0 auto;
+  padding:24px 16px 60px;
+}
+
+.topbar{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:16px;
+  flex-wrap:wrap;
+  margin-bottom:18px;
+}
+
+.back-home{
+  display:inline-flex;
+  align-items:center;
+  gap:8px;
+  text-decoration:none;
+  color:white;
+  background:#1f1f1f;
+  border:1px solid #303030;
+  padding:10px 14px;
+  border-radius:999px;
+  transition:.2s ease;
+}
+
+.back-home:hover{
+  transform:translateY(-1px);
+  border-color:#444;
+  background:#252525;
+}
+
+.logo{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  color:var(--pink);
+  font-size:30px;
+  font-weight:800;
+}
+
+.logo img{
+  width:58px;
+  height:58px;
+}
+
+.hero{
+  text-align:center;
+  margin:14px auto 26px;
+}
+
+.hero h1{
+  margin:0;
+  font-family:Pacifico, cursive;
+  font-weight:400;
+  font-size:clamp(34px, 6vw, 58px);
+  color:var(--pink);
+}
+
+.hero p{
+  color:var(--muted);
+  max-width:720px;
+  margin:10px auto 0;
+  line-height:1.7;
+}
+
+.hero-cats{
+  display:flex;
+  justify-content:center;
+  gap:18px;
+  flex-wrap:wrap;
+  margin-top:22px;
+}
+
+.cat-doodle{
+  background:linear-gradient(180deg, rgba(255,255,255,.03), rgba(255,255,255,.015));
+  border:1px solid rgba(255,255,255,.05);
+  border-radius:24px;
+  padding:14px;
+  width:150px;
+  box-shadow:var(--shadow);
+}
+
+.cat-doodle svg{
+  width:100%;
+  height:auto;
+  display:block;
+}
+
+.main-grid{
+  display:grid;
+  grid-template-columns:minmax(0,1fr) 360px;
+  gap:24px;
+  align-items:start;
+}
+
+.panel{
+  background:linear-gradient(180deg, rgba(255,255,255,.025), rgba(255,255,255,.01));
+  border:1px solid rgba(255,255,255,.05);
+  border-radius:26px;
+  box-shadow:var(--shadow);
+}
+
+.form-panel{
+  padding:24px;
+}
+
+.preview-panel{
+  padding:22px;
+  position:sticky;
+  top:16px;
+}
+
+.section-title{
+  margin:0 0 16px;
+  font-size:24px;
+  font-weight:800;
+}
+
+.form-grid{
+  display:grid;
+  grid-template-columns:repeat(2, minmax(0,1fr));
+  gap:16px;
+}
+
+.field{
+  text-align:left;
+}
+
+.field.full{
+  grid-column:1 / -1;
+}
+
+label{
+  display:block;
+  margin-bottom:8px;
+  color:#ffd8ea;
+  font-size:14px;
+  font-weight:700;
+}
+
+select{
+  width:100%;
+  padding:12px 14px;
+  border-radius:14px;
+  border:1px solid #313131;
+  background:#181818;
+  color:white;
+  font-size:15px;
+  outline:none;
+}
+
+select:focus{
+  border-color:rgba(255,105,180,.5);
+}
+
+.check-row{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  margin-top:8px;
+  color:#ddd;
+  font-size:14px;
+}
+
+.check-row input{
+  transform:scale(1.1);
+}
+
+.generate-btn{
+  margin-top:20px;
+  width:100%;
+  padding:15px 18px;
+  border:none;
+  border-radius:999px;
+  background:linear-gradient(90deg,var(--pink),var(--pink-soft));
+  color:#1a1a1a;
+  font-size:16px;
+  font-weight:800;
+  cursor:pointer;
+  box-shadow:0 12px 26px rgba(0,0,0,.22);
+  transition:transform .18s ease, box-shadow .18s ease;
+}
+
+.generate-btn:hover{
+  transform:translateY(-1px);
+  box-shadow:0 16px 30px rgba(0,0,0,.28);
+}
+
+.preview-card{
+  background:#181818;
+  border:1px solid rgba(255,255,255,.05);
+  border-radius:22px;
+  padding:20px 16px;
+  text-align:center;
+}
+
+.preview-badge{
+  display:inline-block;
+  padding:8px 12px;
+  border-radius:999px;
+  background:rgba(255,105,180,.12);
+  color:#ffd7ea;
+  border:1px solid rgba(255,105,180,.22);
+  font-size:12px;
+  margin-bottom:14px;
+}
+
+.name-output{
+  font-size:42px;
+  font-weight:800;
+  color:white;
+  line-height:1.1;
+  margin:0 0 10px;
+}
+
+.name-sub{
+  color:var(--muted);
+  line-height:1.6;
+  font-size:14px;
+}
+
+.mini-tip{
+  margin-top:16px;
+  color:#c5c5c5;
+  font-size:13px;
+  line-height:1.6;
+}
+
+.sparkle{
+  animation:sparkle 1.2s ease;
+}
+
+@keyframes sparkle{
+  0%{transform:scale(.94);opacity:.6}
+  50%{transform:scale(1.04);opacity:1}
+  100%{transform:scale(1);opacity:1}
+}
+
+.footer{
+  margin-top:60px;
+  padding:30px 20px;
+  text-align:center;
+  color:#888;
+  font-size:14px;
+}
+
+.footer-links{
+  display:flex;
+  justify-content:center;
+  gap:18px;
+  flex-wrap:wrap;
+  margin-bottom:12px;
+}
+
+.footer-links a{
+  color:#aaa;
+  text-decoration:none;
+}
+
+.footer-links a:hover{
+  color:#fff;
+}
+
+.footer-copy{
+  color:#777;
+}
+
+.hidden{
+  display:none;
+}
+
+@media (max-width: 900px){
+  .main-grid{
+    grid-template-columns:1fr;
+  }
+
+  .preview-panel{
+    position:static;
+  }
+}
+
+@media (max-width: 640px){
+  .form-grid{
+    grid-template-columns:1fr;
+  }
+
+  .logo{
+    font-size:26px;
+  }
+
+  .logo img{
+    width:50px;
+    height:50px;
+  }
+
+  .name-output{
+    font-size:34px;
+  }
+}
+</style>
+</head>
+
+<body>
+<div class="page">
+
+  <div class="topbar">
+    <a class="back-home" href="/index.html">← Back to Home</a>
+
+    <div class="logo">
+      <img src="/pink-cat-logo.svg" alt="LookThatCats logo">
+      <span>LookThatCats</span>
+    </div>
+  </div>
+
+  <div class="hero">
+    <h1>Cat Name Generator</h1>
+    <p>Pick your cat’s look, breed, and gender, then generate a cute name from a big global-style cat name pool.</p>
+
+    <div class="hero-cats">
+      <div class="cat-doodle">
+        <svg viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <circle cx="60" cy="68" r="34" fill="#ff95cb"/>
+          <polygon points="32,42 46,18 53,45" fill="#ff95cb"/>
+          <polygon points="88,42 74,18 67,45" fill="#ff95cb"/>
+          <circle cx="48" cy="66" r="5" fill="#111"/>
+          <circle cx="72" cy="66" r="5" fill="#111"/>
+          <path d="M48 82 Q60 92 72 82" stroke="#111" stroke-width="4" fill="none"/>
+        </svg>
+      </div>
+
+      <div class="cat-doodle">
+        <svg viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <circle cx="60" cy="68" r="34" fill="#ffd7a8"/>
+          <polygon points="32,42 46,18 53,45" fill="#ffd7a8"/>
+          <polygon points="88,42 74,18 67,45" fill="#ffd7a8"/>
+          <circle cx="48" cy="66" r="5" fill="#111"/>
+          <circle cx="72" cy="66" r="5" fill="#2aa3ff"/>
+          <path d="M48 82 Q60 92 72 82" stroke="#111" stroke-width="4" fill="none"/>
+        </svg>
+      </div>
+
+      <div class="cat-doodle">
+        <svg viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <circle cx="60" cy="68" r="34" fill="#d9d9d9"/>
+          <polygon points="32,42 46,18 53,45" fill="#d9d9d9"/>
+          <polygon points="88,42 74,18 67,45" fill="#d9d9d9"/>
+          <circle cx="48" cy="66" r="5" fill="#54b848"/>
+          <circle cx="72" cy="66" r="5" fill="#111"/>
+          <path d="M48 82 Q60 92 72 82" stroke="#111" stroke-width="4" fill="none"/>
+        </svg>
+      </div>
+    </div>
+  </div>
+
+  <div class="main-grid">
+    <section class="panel form-panel">
+      <h2 class="section-title">Build your cat</h2>
+
+      <div class="form-grid">
+        <div class="field">
+          <label for="catGender">Gender</label>
+          <select id="catGender">
+            <option value="female">Female</option>
+            <option value="male">Male</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label for="catBreed">Breed</label>
+          <select id="catBreed">
+            <option>Persian</option>
+            <option>British Shorthair</option>
+            <option>Maine Coon</option>
+            <option>Scottish Fold</option>
+            <option>Siamese</option>
+            <option>Ragdoll</option>
+            <option>Sphynx</option>
+            <option>Bengal</option>
+            <option>Russian Blue</option>
+            <option>Turkish Angora</option>
+            <option>Mixed Breed</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label for="coatColor">Coat color</label>
+          <select id="coatColor">
+            <option>Black</option>
+            <option>White</option>
+            <option>Gray</option>
+            <option>Orange</option>
+            <option>Brown</option>
+            <option>Cream</option>
+            <option>Golden</option>
+            <option>Calico</option>
+            <option>Tuxedo</option>
+            <option>Tabby</option>
+            <option>Blue-gray</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label for="eyeColor1">Eye color</label>
+          <select id="eyeColor1">
+            <option>Green</option>
+            <option>Blue</option>
+            <option>Amber</option>
+            <option>Yellow</option>
+            <option>Hazel</option>
+            <option>Copper</option>
+          </select>
+        </div>
+
+        <div class="field full">
+          <div class="check-row">
+            <input type="checkbox" id="heterochromiaToggle">
+            <label for="heterochromiaToggle" style="margin:0;">Heterochromia (different eye colors)</label>
+          </div>
+        </div>
+
+        <div class="field hidden" id="eyeColor2Wrap">
+          <label for="eyeColor2">Second eye color</label>
+          <select id="eyeColor2">
+            <option>Blue</option>
+            <option>Green</option>
+            <option>Amber</option>
+            <option>Yellow</option>
+            <option>Hazel</option>
+            <option>Copper</option>
+          </select>
+        </div>
+      </div>
+
+      <button class="generate-btn" id="generateBtn">✨ Generate Cat Name</button>
+    </section>
+
+    <aside class="panel preview-panel">
+      <h2 class="section-title">Generated result</h2>
+
+      <div class="preview-card sparkle" id="previewCard">
+        <div class="preview-badge">Name ready</div>
+        <div class="name-output" id="nameOutput">Luna</div>
+        <div class="name-sub" id="nameSub">A sweet match for a white Persian with green eyes.</div>
+      </div>
+
+      <div class="mini-tip">
+        Names won’t repeat right away for the same gender. Once the pool is exhausted, it resets automatically.
+      </div>
+    </aside>
+  </div>
+
+  <footer class="footer">
+    <div class="footer-links">
+      <a href="/about.html">About</a>
+      <a href="/privacy.html">Privacy</a>
+      <a href="/terms.html">Terms</a>
+      <a href="/contact.html">Contact</a>
+    </div>
+    <div class="footer-copy">© 2026 LookThatCats • Daily Cat Tournament</div>
+  </footer>
+
+</div>
+
+<script>
+const femaleFile = "/female-cat-names.json";
+const maleFile = "/male-cat-names.json";
+
+const usedStorageKeyFemale = "ltc_used_female_names_v1";
+const usedStorageKeyMale = "ltc_used_male_names_v1";
+
+const heteroToggle = document.getElementById("heterochromiaToggle");
+const eyeColor2Wrap = document.getElementById("eyeColor2Wrap");
+const generateBtn = document.getElementById("generateBtn");
+const nameOutput = document.getElementById("nameOutput");
+const nameSub = document.getElementById("nameSub");
+const previewCard = document.getElementById("previewCard");
+
+heteroToggle.addEventListener("change", () => {
+  eyeColor2Wrap.classList.toggle("hidden", !heteroToggle.checked);
+});
+
+function getUsedKey(gender) {
+  return gender === "female" ? usedStorageKeyFemale : usedStorageKeyMale;
+}
+
+function getUsedNames(gender) {
+  const raw = localStorage.getItem(getUsedKey(gender));
+  try {
+    return raw ? JSON.parse(raw) : [];
+  } catch {
+    return [];
+  }
+}
+
+function setUsedNames(gender, names) {
+  localStorage.setItem(getUsedKey(gender), JSON.stringify(names));
+}
+
+async function loadNamePool(gender) {
+  const file = gender === "female" ? femaleFile : maleFile;
+  const res = await fetch(file);
+  if (!res.ok) throw new Error("Could not load name pool");
+  return await res.json();
+}
+
+function pickRandom(arr) {
+  return arr[Math.floor(Math.random() * arr.length)];
+}
+
+async function generateName() {
+  const gender = document.getElementById("catGender").value;
+  const breed = document.getElementById("catBreed").value;
+  const coatColor = document.getElementById("coatColor").value;
+  const eyeColor1 = document.getElementById("eyeColor1").value;
+  const eyeColor2 = document.getElementById("eyeColor2").value;
+  const isHetero = heteroToggle.checked;
+
+  const pool = await loadNamePool(gender);
+  let used = getUsedNames(gender);
+
+  let available = pool.filter(name => !used.includes(name));
+
+  if (available.length === 0) {
+    used = [];
+    setUsedNames(gender, used);
+    available = [...pool];
+  }
+
+  const chosen = pickRandom(available);
+  used.push(chosen);
+  setUsedNames(gender, used);
+
+  const eyeText = isHetero
+    ? `${eyeColor1} and ${eyeColor2} eyes`
+    : `${eyeColor1} eyes`;
+
+  nameOutput.textContent = chosen;
+  nameSub.textContent = `A lovely match for a ${coatColor.toLowerCase()} ${breed} with ${eyeText}.`;
+
+  previewCard.classList.remove("sparkle");
+  void previewCard.offsetWidth;
+  previewCard.classList.add("sparkle");
+}
+
+generateBtn.addEventListener("click", generateName);
+window.addEventListener("load", generateName);
+</script>
+</body>
+</html>
