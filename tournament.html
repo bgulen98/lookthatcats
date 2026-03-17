@@ -737,438 +737,443 @@
   <div class="explosion" id="explosion"></div>
 
   <script>
-    let rounds = [];
-    let currentRoundIndex = 0;
-    let currentMatchIndex = 0;
-    let currentPair = null;
-    let completedMatches = 0;
-    let tournamentDate = "";
-    let isAdvancing = false;
-    let readyForPick = false;
-    let localStats = {};
-    const TOTAL_MATCHES = 31;
+let rounds = [];
+let currentRoundIndex = 0;
+let currentMatchIndex = 0;
+let currentPair = null;
+let completedMatches = 0;
+let tournamentDate = "";
+let isAdvancing = false;
+let readyForPick = false;
+let localStats = {};
+let transitionTimer = null;
+const TOTAL_MATCHES = 31;
 
-    function roundName(size) {
-      if (size === 32) return "Round of 32";
-      if (size === 16) return "Sweet 16";
-      if (size === 8) return "Quarter Finals";
-      if (size === 4) return "Semi Finals";
-      if (size === 2) return "Grand Final";
-      return "Tournament";
+function roundName(size) {
+  if (size === 32) return "Round of 32";
+  if (size === 16) return "Sweet 16";
+  if (size === 8) return "Quarter Finals";
+  if (size === 4) return "Semi Finals";
+  if (size === 2) return "Grand Final";
+  return "Tournament";
+}
+
+function roundDescription(size) {
+  if (size === 16) return "Your first 16 winners are in. Ready for the next wave?";
+  if (size === 8) return "Only the strongest fluff remains. Quarter Finals unlocked.";
+  if (size === 4) return "These cats are elite. Semi Finals begin now.";
+  if (size === 2) return "One last battle decides today’s champion.";
+  return "Ready for the next stage?";
+}
+
+function updateProgress() {
+  const progress = Math.round((completedMatches / TOTAL_MATCHES) * 100);
+  document.getElementById("progressFill").style.width = `${progress}%`;
+  document.getElementById("progressText").textContent = `${completedMatches} / ${TOTAL_MATCHES} picks completed`;
+
+  const currentRound = rounds[currentRoundIndex] || [];
+  document.getElementById("roundLabel").textContent = roundName(currentRound.length);
+  document.getElementById("roundText").textContent = currentRound.length > 2 ? "Pick your cutest cat 💖" : "The crown is close 👑";
+
+  const totalMatchesThisRound = Math.max(1, currentRound.length / 2);
+  const currentMatch = Math.min(Math.floor(currentMatchIndex / 2) + 1, totalMatchesThisRound);
+  document.getElementById("matchLabel").textContent = `Match ${currentMatch} / ${totalMatchesThisRound}`;
+}
+
+function lockChoices(message = "") {
+  document.getElementById("choiceA").classList.add("locked");
+  document.getElementById("choiceB").classList.add("locked");
+  document.getElementById("loadingNote").textContent = message;
+  readyForPick = false;
+}
+
+function unlockChoices(message = "") {
+  document.getElementById("choiceA").classList.remove("locked");
+  document.getElementById("choiceB").classList.remove("locked");
+  document.getElementById("loadingNote").textContent = message;
+  readyForPick = true;
+  isAdvancing = false;
+}
+
+function safeSetImage(img, url) {
+  img.classList.remove("loaded");
+
+  return new Promise((resolve) => {
+    let done = false;
+
+    const finish = () => {
+      if (done) return;
+      done = true;
+      img.classList.add("loaded");
+      resolve();
+    };
+
+    if (img.src === url && img.complete) {
+      requestAnimationFrame(finish);
+      return;
     }
 
-    function roundDescription(size) {
-      if (size === 16) return "Your first 16 winners are in. Ready for the next wave?";
-      if (size === 8) return "Only the strongest fluff remains. Quarter Finals unlocked.";
-      if (size === 4) return "These cats are elite. Semi Finals begin now.";
-      if (size === 2) return "One last battle decides today’s champion.";
-      return "Ready for the next stage?";
-    }
-
-    function updateProgress() {
-      const progress = Math.round((completedMatches / TOTAL_MATCHES) * 100);
-      document.getElementById("progressFill").style.width = `${progress}%`;
-      document.getElementById("progressText").textContent = `${completedMatches} / ${TOTAL_MATCHES} picks completed`;
-
-      const currentRound = rounds[currentRoundIndex] || [];
-      document.getElementById("roundLabel").textContent = roundName(currentRound.length);
-      document.getElementById("roundText").textContent = currentRound.length > 2 ? "Pick your cutest cat 💖" : "The crown is close 👑";
-
-      const totalMatchesThisRound = Math.max(1, currentRound.length / 2);
-      const currentMatch = Math.min(Math.floor(currentMatchIndex / 2) + 1, totalMatchesThisRound);
-      document.getElementById("matchLabel").textContent = `Match ${currentMatch} / ${totalMatchesThisRound}`;
-    }
-
-    function lockChoices(message = "") {
-      document.getElementById("choiceA").classList.add("locked");
-      document.getElementById("choiceB").classList.add("locked");
-      document.getElementById("loadingNote").textContent = message;
-      readyForPick = false;
-    }
-
-    function unlockChoices(message = "") {
-      document.getElementById("choiceA").classList.remove("locked");
-      document.getElementById("choiceB").classList.remove("locked");
-      document.getElementById("loadingNote").textContent = message;
-      readyForPick = true;
-      isAdvancing = false;
-    }
-
-    function loadImage(img, url) {
-      return new Promise(resolve => {
-        let done = false;
-
-        const finish = () => {
-          if (done) return;
-          done = true;
-          img.classList.add("loaded");
-          resolve();
-        };
-
-        img.classList.remove("loaded");
-
-        const timeout = setTimeout(() => {
-          finish();
-        }, 3500);
-
-        img.onload = () => {
-          clearTimeout(timeout);
-          finish();
-        };
-
-        img.onerror = () => {
-          clearTimeout(timeout);
-          finish();
-        };
-
-        img.src = url;
-      });
-    }
-
-    function showExplosion(rate) {
-      const el = document.getElementById("explosion");
-      el.innerHTML = `${rate}% WIN RATE!<small>That cat just advanced ✨</small>`;
-      el.classList.add("show");
-
-      setTimeout(() => {
-        el.classList.remove("show");
-      }, 1800);
-    }
-
-    function renderLeaderboard(arr) {
-      const el = document.getElementById("leaderboard");
-      el.innerHTML = "";
-
-      if (!arr.length) {
-        el.innerHTML = `<div class="empty-state">No tournament cats ranked yet.<br>Finish a tournament to help build today’s top 10.</div>`;
-        return;
-      }
-
-      arr.forEach((cat, idx) => {
-        const rate = Math.round((cat.w / cat.v) * 100);
-
-        let medal = "#" + (idx + 1);
-        if (idx === 0) medal = "🥇";
-        if (idx === 1) medal = "🥈";
-        if (idx === 2) medal = "🥉";
-
-        const item = document.createElement("div");
-        item.className = "leader-item";
-        item.innerHTML = `
-          <img src="${cat.url}" alt="Ranked cat" loading="lazy">
-          <div>
-            <div class="leader-rank">${medal}</div>
-            <div class="leader-rate">${rate}% win rate</div>
-            <div class="leader-votes">${cat.w} wins • ${cat.v} appearances</div>
-          </div>
-        `;
-        el.appendChild(item);
-      });
-    }
-
-    async function fetchTournament() {
-      const res = await fetch("/api/tournament/init");
-      const data = await res.json();
-      tournamentDate = data.date;
-      return data;
-    }
-
-    async function fetchLeaderboard() {
-      const res = await fetch("/api/tournament/leaderboard");
-      const data = await res.json();
-      renderLeaderboard(data.leaderboard || []);
-    }
-
-    function ensureStat(cat) {
-      if (!localStats[cat.id]) {
-        localStats[cat.id] = {
-          w: 0,
-          v: 0,
-          url: cat.url
-        };
-      }
-    }
-
-    function recordLocalBattle(winnerCat, loserCat) {
-      ensureStat(winnerCat);
-      ensureStat(loserCat);
-
-      localStats[winnerCat.id].w += 1;
-      localStats[winnerCat.id].v += 1;
-      localStats[loserCat.id].v += 1;
-
-      return localStats[winnerCat.id];
-    }
-
-    function showRoundTransition(nextRoundSize) {
-      document.getElementById("roundScreen").className = "round-screen show";
-      document.getElementById("roundBadge").textContent = nextRoundSize === 2 ? "Final Stage" : "Next Stage";
-      document.getElementById("roundScreenTitle").textContent = roundName(nextRoundSize);
-      document.getElementById("roundScreenDesc").textContent = roundDescription(nextRoundSize);
-
-      document.getElementById("battleArea").style.display = "none";
-      document.getElementById("loadingNote").textContent = "";
-      readyForPick = false;
-      isAdvancing = false;
-    }
-
-    function hideRoundTransition() {
-      document.getElementById("roundScreen").className = "round-screen";
-      document.getElementById("battleArea").style.display = "grid";
-    }
-
-    async function renderCurrentMatch() {
-      const round = rounds[currentRoundIndex];
-
-      if (!round || round.length === 1) {
-        await renderWinner(round[0]);
-        return;
-      }
-
-      currentPair = [round[currentMatchIndex], round[currentMatchIndex + 1]];
-      hideRoundTransition();
-      lockChoices("Loading next matchup...");
-
-      await Promise.all([
-        loadImage(document.getElementById("catA"), currentPair[0].url),
-        loadImage(document.getElementById("catB"), currentPair[1].url)
-      ]);
-
-      updateProgress();
-      unlockChoices("");
-    }
-
-    function nextMatch(winnerCat) {
-      if (!readyForPick || isAdvancing || !currentPair) return;
-
-      isAdvancing = true;
-      readyForPick = false;
-
-      const loserCat = currentPair[0].id === winnerCat.id ? currentPair[1] : currentPair[0];
-      const stat = recordLocalBattle(winnerCat, loserCat);
-      const rate = Math.round((stat.w / stat.v) * 100);
-
-      showExplosion(rate);
-      lockChoices("Nice pick ✨");
-
-      const currentRound = rounds[currentRoundIndex];
-      const nextRoundIndex = currentRoundIndex + 1;
-
-      if (!rounds[nextRoundIndex]) rounds[nextRoundIndex] = [];
-      rounds[nextRoundIndex].push(winnerCat);
-
-      completedMatches += 1;
-
-      setTimeout(async () => {
-        currentMatchIndex += 2;
-        const finishedRound = currentMatchIndex >= currentRound.length;
-
-        if (finishedRound) {
-          currentRoundIndex += 1;
-          currentMatchIndex = 0;
-
-          const upcomingRound = rounds[currentRoundIndex];
-          if (upcomingRound && upcomingRound.length > 1) {
-            showRoundTransition(upcomingRound.length);
-          } else {
-            await renderCurrentMatch();
-          }
-        } else {
-          await renderCurrentMatch();
-        }
-      }, 220);
-    }
-
-    async function submitTournamentResults(championCat) {
-      document.getElementById("loadingNote").textContent = "Saving your tournament result...";
-
-      const slimResults = {};
-      for (const [catId, stat] of Object.entries(localStats)) {
-        slimResults[catId] = {
-          w: stat.w,
-          v: stat.v
-        };
-      }
-
-      const res = await fetch("/api/tournament/submit", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-          date: tournamentDate,
-          championId: championCat.id,
-          results: slimResults
-        })
-      });
-
-      const data = await res.json();
-
-      if (!res.ok || !data.success) {
-        throw new Error("Failed to submit tournament");
-      }
-
-      renderLeaderboard(data.leaderboard || []);
-      return data;
-    }
-
-    function launchConfetti() {
-      const canvas = document.getElementById("confetti");
-      const box = document.getElementById("resultBox");
-      const ctx = canvas.getContext("2d");
-
-      const rect = box.getBoundingClientRect();
-      canvas.width = rect.width * devicePixelRatio;
-      canvas.height = rect.height * devicePixelRatio;
-      canvas.style.width = rect.width + "px";
-      canvas.style.height = rect.height + "px";
-      ctx.scale(devicePixelRatio, devicePixelRatio);
-
-      const colors = ["#ff69b4", "#ffd76a", "#ffffff", "#ff9dd0", "#ffc6de"];
-      const pieces = Array.from({ length: 120 }, () => ({
-        x: Math.random() * rect.width,
-        y: -20 - Math.random() * rect.height * 0.4,
-        w: 6 + Math.random() * 8,
-        h: 8 + Math.random() * 10,
-        color: colors[Math.floor(Math.random() * colors.length)],
-        speed: 2 + Math.random() * 4,
-        drift: -2 + Math.random() * 4,
-        rot: Math.random() * Math.PI,
-        rotSpeed: -0.2 + Math.random() * 0.4
-      }));
-
-      let start = null;
-      function frame(ts) {
-        if (!start) start = ts;
-        const elapsed = ts - start;
-
-        ctx.clearRect(0, 0, rect.width, rect.height);
-
-        pieces.forEach(p => {
-          p.y += p.speed;
-          p.x += p.drift;
-          p.rot += p.rotSpeed;
-
-          ctx.save();
-          ctx.translate(p.x, p.y);
-          ctx.rotate(p.rot);
-          ctx.fillStyle = p.color;
-          ctx.fillRect(-p.w / 2, -p.h / 2, p.w, p.h);
-          ctx.restore();
-        });
-
-        if (elapsed < 3500) {
-          requestAnimationFrame(frame);
-        } else {
-          ctx.clearRect(0, 0, rect.width, rect.height);
-        }
-      }
-
-      requestAnimationFrame(frame);
-    }
-
-    async function renderWinner(cat) {
-      document.getElementById("battleArea").style.display = "none";
-      document.getElementById("roundScreen").className = "round-screen";
-      document.getElementById("resultBox").classList.add("show");
-      document.getElementById("winnerImg").src = cat.url;
-
-      const localChampionStat = localStats[cat.id];
-      const localRate = localChampionStat ? Math.round((localChampionStat.w / localChampionStat.v) * 100) : 100;
-
-      document.getElementById("winnerMeta").textContent =
-        `Your champion finished your bracket with a ${localRate}% personal win rate.`;
-
-      document.getElementById("winnerSub").textContent =
-        "Submitting your full tournament to today’s global rankings...";
-
-      document.getElementById("shareWinnerBtn").onclick = () => shareCat(
-        cat.url,
-        "I just finished today’s cat tournament and crowned this champion!"
-      );
-
-      setTimeout(() => launchConfetti(), 100);
-
-      try {
-        const data = await submitTournamentResults(cat);
-        if (data.champion) {
-          const globalRate = Math.round((data.champion.w / data.champion.v) * 100);
-          document.getElementById("winnerMeta").textContent =
-            `Your champion now holds a global ${globalRate}% win rate today.`;
-          document.getElementById("winnerSub").textContent =
-            "Your result has been added to today’s global cat rankings.";
-        }
-        document.getElementById("loadingNote").textContent = "Tournament saved 💖";
-      } catch (err) {
-        console.error(err);
-        document.getElementById("winnerSub").textContent =
-          "Could not save your result, but your champion is still glorious.";
-        document.getElementById("loadingNote").textContent = "";
-      }
-
-      readyForPick = false;
-      isAdvancing = false;
-    }
-
-    async function shareCat(url, text = "Look at this cute cat from LookThatCats!") {
-      if (navigator.share) {
-        try {
-          await navigator.share({
-            title: "LookThatCats",
-            text,
-            url
-          });
-        } catch (e) {}
-      } else {
-        window.open(
-          "https://twitter.com/intent/tweet?text=" + encodeURIComponent(text) + "&url=" + encodeURIComponent(url),
-          "_blank"
-        );
-      }
-    }
-
-    function startTournament(cats) {
-      rounds = [cats.slice()];
-      currentRoundIndex = 0;
+    img.onload = finish;
+    img.onerror = finish;
+    img.src = url;
+
+    setTimeout(finish, 1200);
+  });
+}
+
+function showExplosion(rate) {
+  const el = document.getElementById("explosion");
+  el.innerHTML = `${rate}% WIN RATE!<small>That cat just advanced ✨</small>`;
+  el.classList.add("show");
+
+  setTimeout(() => {
+    el.classList.remove("show");
+  }, 1600);
+}
+
+function renderLeaderboard(arr) {
+  const el = document.getElementById("leaderboard");
+  el.innerHTML = "";
+
+  if (!arr.length) {
+    el.innerHTML = `<div class="empty-state">No tournament cats ranked yet.<br>Finish a tournament to help build today’s top 10.</div>`;
+    return;
+  }
+
+  arr.forEach((cat, idx) => {
+    const rate = Math.round((cat.w / cat.v) * 100);
+
+    let medal = "#" + (idx + 1);
+    if (idx === 0) medal = "🥇";
+    if (idx === 1) medal = "🥈";
+    if (idx === 2) medal = "🥉";
+
+    const item = document.createElement("div");
+    item.className = "leader-item";
+    item.innerHTML = `
+      <img src="${cat.url}" alt="Ranked cat" loading="lazy">
+      <div>
+        <div class="leader-rank">${medal}</div>
+        <div class="leader-rate">${rate}% win rate</div>
+        <div class="leader-votes">${cat.w} wins • ${cat.v} appearances</div>
+      </div>
+    `;
+    el.appendChild(item);
+  });
+}
+
+async function fetchTournament() {
+  const res = await fetch("/api/tournament/init");
+  const data = await res.json();
+  tournamentDate = data.date;
+  return data;
+}
+
+async function fetchLeaderboard() {
+  const res = await fetch("/api/tournament/leaderboard");
+  const data = await res.json();
+  renderLeaderboard(data.leaderboard || []);
+}
+
+function ensureStat(cat) {
+  if (!localStats[cat.id]) {
+    localStats[cat.id] = {
+      w: 0,
+      v: 0,
+      url: cat.url
+    };
+  }
+}
+
+function recordLocalBattle(winnerCat, loserCat) {
+  ensureStat(winnerCat);
+  ensureStat(loserCat);
+
+  localStats[winnerCat.id].w += 1;
+  localStats[winnerCat.id].v += 1;
+  localStats[loserCat.id].v += 1;
+
+  return localStats[winnerCat.id];
+}
+
+function showRoundTransition(nextRoundSize) {
+  document.getElementById("roundScreen").className = "round-screen show";
+  document.getElementById("roundBadge").textContent = nextRoundSize === 2 ? "Final Stage" : "Next Stage";
+  document.getElementById("roundScreenTitle").textContent = roundName(nextRoundSize);
+  document.getElementById("roundScreenDesc").textContent = roundDescription(nextRoundSize);
+
+  document.getElementById("battleArea").style.display = "none";
+  document.getElementById("loadingNote").textContent = "";
+  readyForPick = false;
+  isAdvancing = false;
+}
+
+function hideRoundTransition() {
+  document.getElementById("roundScreen").className = "round-screen";
+  document.getElementById("battleArea").style.display = "grid";
+}
+
+async function renderCurrentMatch() {
+  const round = rounds[currentRoundIndex];
+
+  if (!round || round.length === 1) {
+    await renderWinner(round[0]);
+    return;
+  }
+
+  currentPair = [round[currentMatchIndex], round[currentMatchIndex + 1]];
+  hideRoundTransition();
+  lockChoices("Loading next matchup...");
+
+  const imgA = document.getElementById("catA");
+  const imgB = document.getElementById("catB");
+
+  await Promise.all([
+    safeSetImage(imgA, currentPair[0].url),
+    safeSetImage(imgB, currentPair[1].url)
+  ]);
+
+  updateProgress();
+  unlockChoices("");
+}
+
+function nextMatch(winnerCat) {
+  if (!readyForPick || isAdvancing || !currentPair) return;
+
+  isAdvancing = true;
+  readyForPick = false;
+
+  const loserCat = currentPair[0].id === winnerCat.id ? currentPair[1] : currentPair[0];
+  const stat = recordLocalBattle(winnerCat, loserCat);
+  const rate = Math.round((stat.w / stat.v) * 100);
+
+  showExplosion(rate);
+  lockChoices("Nice pick ✨");
+
+  const currentRound = rounds[currentRoundIndex];
+  const nextRoundIndex = currentRoundIndex + 1;
+
+  if (!rounds[nextRoundIndex]) rounds[nextRoundIndex] = [];
+  rounds[nextRoundIndex].push(winnerCat);
+
+  completedMatches += 1;
+
+  if (transitionTimer) clearTimeout(transitionTimer);
+
+  transitionTimer = setTimeout(async () => {
+    currentMatchIndex += 2;
+    const finishedRound = currentMatchIndex >= currentRound.length;
+
+    if (finishedRound) {
+      currentRoundIndex += 1;
       currentMatchIndex = 0;
-      currentPair = null;
-      completedMatches = 0;
-      isAdvancing = false;
-      readyForPick = false;
-      localStats = {};
 
-      document.getElementById("battleArea").style.display = "grid";
-      document.getElementById("resultBox").classList.remove("show");
-      document.getElementById("roundScreen").className = "round-screen";
-      document.getElementById("loadingNote").textContent = "";
-      document.getElementById("winnerSub").textContent = "";
-
-      renderCurrentMatch();
-    }
-
-    document.getElementById("choiceA").addEventListener("click", () => {
-      if (currentPair) nextMatch(currentPair[0]);
-    });
-
-    document.getElementById("choiceB").addEventListener("click", () => {
-      if (currentPair) nextMatch(currentPair[1]);
-    });
-
-    document.getElementById("continueRoundBtn").addEventListener("click", async () => {
+      const upcomingRound = rounds[currentRoundIndex];
+      if (upcomingRound && upcomingRound.length > 1) {
+        showRoundTransition(upcomingRound.length);
+      } else {
+        await renderCurrentMatch();
+      }
+    } else {
       await renderCurrentMatch();
+    }
+  }, 220);
+}
+
+async function submitTournamentResults(championCat) {
+  document.getElementById("loadingNote").textContent = "Saving your tournament result...";
+
+  const slimResults = {};
+  for (const [catId, stat] of Object.entries(localStats)) {
+    slimResults[catId] = {
+      w: stat.w,
+      v: stat.v
+    };
+  }
+
+  const res = await fetch("/api/tournament/submit", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      date: tournamentDate,
+      championId: championCat.id,
+      results: slimResults
+    })
+  });
+
+  const data = await res.json();
+
+  if (!res.ok || !data.success) {
+    throw new Error("Failed to submit tournament");
+  }
+
+  renderLeaderboard(data.leaderboard || []);
+  return data;
+}
+
+function launchConfetti() {
+  const canvas = document.getElementById("confetti");
+  const box = document.getElementById("resultBox");
+  const ctx = canvas.getContext("2d");
+
+  const rect = box.getBoundingClientRect();
+  canvas.width = rect.width * devicePixelRatio;
+  canvas.height = rect.height * devicePixelRatio;
+  canvas.style.width = rect.width + "px";
+  canvas.style.height = rect.height + "px";
+  ctx.scale(devicePixelRatio, devicePixelRatio);
+
+  const colors = ["#ff69b4", "#ffd76a", "#ffffff", "#ff9dd0", "#ffc6de"];
+  const pieces = Array.from({ length: 120 }, () => ({
+    x: Math.random() * rect.width,
+    y: -20 - Math.random() * rect.height * 0.4,
+    w: 6 + Math.random() * 8,
+    h: 8 + Math.random() * 10,
+    color: colors[Math.floor(Math.random() * colors.length)],
+    speed: 2 + Math.random() * 4,
+    drift: -2 + Math.random() * 4,
+    rot: Math.random() * Math.PI,
+    rotSpeed: -0.2 + Math.random() * 0.4
+  }));
+
+  let start = null;
+  function frame(ts) {
+    if (!start) start = ts;
+    const elapsed = ts - start;
+
+    ctx.clearRect(0, 0, rect.width, rect.height);
+
+    pieces.forEach(p => {
+      p.y += p.speed;
+      p.x += p.drift;
+      p.rot += p.rotSpeed;
+
+      ctx.save();
+      ctx.translate(p.x, p.y);
+      ctx.rotate(p.rot);
+      ctx.fillStyle = p.color;
+      ctx.fillRect(-p.w / 2, -p.h / 2, p.w, p.h);
+      ctx.restore();
     });
 
-    document.getElementById("restartBtn").addEventListener("click", async () => {
-      const data = await fetchTournament();
-      startTournament(data.cats);
-      await fetchLeaderboard();
-    });
+    if (elapsed < 3500) {
+      requestAnimationFrame(frame);
+    } else {
+      ctx.clearRect(0, 0, rect.width, rect.height);
+    }
+  }
 
-    (async function init() {
-      const data = await fetchTournament();
-      startTournament(data.cats);
-      await fetchLeaderboard();
-    })();
-  </script>
+  requestAnimationFrame(frame);
+}
+
+async function renderWinner(cat) {
+  document.getElementById("battleArea").style.display = "none";
+  document.getElementById("roundScreen").className = "round-screen";
+  document.getElementById("resultBox").classList.add("show");
+  document.getElementById("winnerImg").src = cat.url;
+
+  const localChampionStat = localStats[cat.id];
+  const localRate = localChampionStat ? Math.round((localChampionStat.w / localChampionStat.v) * 100) : 100;
+
+  document.getElementById("winnerMeta").textContent =
+    `Your champion finished your bracket with a ${localRate}% personal win rate.`;
+
+  document.getElementById("winnerSub").textContent =
+    "Submitting your full tournament to today’s global rankings...";
+
+  document.getElementById("shareWinnerBtn").onclick = () => shareCat(
+    cat.url,
+    "I just finished today’s cat tournament and crowned this champion!"
+  );
+
+  setTimeout(() => launchConfetti(), 100);
+
+  try {
+    const data = await submitTournamentResults(cat);
+    if (data.champion) {
+      const globalRate = Math.round((data.champion.w / data.champion.v) * 100);
+      document.getElementById("winnerMeta").textContent =
+        `Your champion now holds a global ${globalRate}% win rate today.`;
+      document.getElementById("winnerSub").textContent =
+        "Your result has been added to today’s global cat rankings.";
+    }
+    document.getElementById("loadingNote").textContent = "Tournament saved 💖";
+  } catch (err) {
+    console.error(err);
+    document.getElementById("winnerSub").textContent =
+      "Could not save your result, but your champion is still glorious.";
+    document.getElementById("loadingNote").textContent = "";
+  }
+
+  readyForPick = false;
+  isAdvancing = false;
+}
+
+async function shareCat(url, text = "Look at this cute cat from LookThatCats!") {
+  if (navigator.share) {
+    try {
+      await navigator.share({
+        title: "LookThatCats",
+        text,
+        url
+      });
+    } catch (e) {}
+  } else {
+    window.open(
+      "https://twitter.com/intent/tweet?text=" + encodeURIComponent(text) + "&url=" + encodeURIComponent(url),
+      "_blank"
+    );
+  }
+}
+
+function startTournament(cats) {
+  rounds = [cats.slice()];
+  currentRoundIndex = 0;
+  currentMatchIndex = 0;
+  currentPair = null;
+  completedMatches = 0;
+  isAdvancing = false;
+  readyForPick = false;
+  localStats = {};
+
+  if (transitionTimer) clearTimeout(transitionTimer);
+  transitionTimer = null;
+
+  document.getElementById("battleArea").style.display = "grid";
+  document.getElementById("resultBox").classList.remove("show");
+  document.getElementById("roundScreen").className = "round-screen";
+  document.getElementById("loadingNote").textContent = "";
+  document.getElementById("winnerSub").textContent = "";
+
+  renderCurrentMatch();
+}
+
+document.getElementById("choiceA").addEventListener("click", () => {
+  if (currentPair) nextMatch(currentPair[0]);
+});
+
+document.getElementById("choiceB").addEventListener("click", () => {
+  if (currentPair) nextMatch(currentPair[1]);
+});
+
+document.getElementById("continueRoundBtn").addEventListener("click", async () => {
+  await renderCurrentMatch();
+});
+
+document.getElementById("restartBtn").addEventListener("click", async () => {
+  const data = await fetchTournament();
+  startTournament(data.cats);
+  await fetchLeaderboard();
+});
+
+(async function init() {
+  const data = await fetchTournament();
+  startTournament(data.cats);
+  await fetchLeaderboard();
+})();
+</script>
+  
 </body>
 </html>
