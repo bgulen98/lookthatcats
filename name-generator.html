@@ -261,9 +261,19 @@ select:focus{
 .name-output{
   font-size:42px;
   font-weight:800;
-  color:white;
   line-height:1.1;
   margin:0 0 10px;
+  transition:color .25s ease, text-shadow .25s ease;
+}
+
+.name-female{
+  color:#ff87c8;
+  text-shadow:0 0 18px rgba(255,135,200,.18);
+}
+
+.name-male{
+  color:#8fb7ff;
+  text-shadow:0 0 18px rgba(143,183,255,.16);
 }
 
 .name-sub{
@@ -492,7 +502,7 @@ select:focus{
 
       <div class="preview-card sparkle" id="previewCard">
         <div class="preview-badge">Name ready</div>
-        <div class="name-output" id="nameOutput">Luna</div>
+        <div class="name-output name-female" id="nameOutput">Luna</div>
         <div class="name-sub" id="nameSub">A sweet match for a white Persian with green eyes.</div>
       </div>
 
@@ -520,6 +530,32 @@ const maleFile = "/male-cat-names.json";
 
 const usedStorageKeyFemale = "ltc_used_female_names_v1";
 const usedStorageKeyMale = "ltc_used_male_names_v1";
+
+const femaleNameColors = [
+  "#ff87c8",
+  "#ff6fa8",
+  "#ff9ed2",
+  "#ff5f8f",
+  "#ff79b7",
+  "#ff4f9d",
+  "#f26bb7",
+  "#ff8aa1",
+  "#e85aa8",
+  "#ff7ecf"
+];
+
+const maleNameColors = [
+  "#8fb7ff",
+  "#6ea8ff",
+  "#7b8dff",
+  "#87a8d8",
+  "#9aa7c7",
+  "#6f8fc9",
+  "#7aa6d9",
+  "#8ea1b8",
+  "#5e87d8",
+  "#94a9d6"
+];
 
 const heteroToggle = document.getElementById("heterochromiaToggle");
 const eyeColor2Wrap = document.getElementById("eyeColor2Wrap");
@@ -560,6 +596,21 @@ function pickRandom(arr) {
   return arr[Math.floor(Math.random() * arr.length)];
 }
 
+function applyNameColor(gender) {
+  const palette = gender === "female" ? femaleNameColors : maleNameColors;
+  const color = pickRandom(palette);
+
+  nameOutput.classList.remove("name-female", "name-male");
+  nameOutput.classList.add(gender === "female" ? "name-female" : "name-male");
+  nameOutput.style.color = color;
+
+  if (gender === "female") {
+    nameOutput.style.textShadow = `0 0 18px rgba(255,105,180,.18)`;
+  } else {
+    nameOutput.style.textShadow = `0 0 18px rgba(120,170,255,.16)`;
+  }
+}
+
 async function generateName() {
   const gender = document.getElementById("catGender").value;
   const breed = document.getElementById("catBreed").value;
@@ -588,6 +639,8 @@ async function generateName() {
     : `${eyeColor1} eyes`;
 
   nameOutput.textContent = chosen;
+  applyNameColor(gender);
+
   nameSub.textContent = `A lovely match for a ${coatColor.toLowerCase()} ${breed} with ${eyeText}.`;
 
   previewCard.classList.remove("sparkle");
