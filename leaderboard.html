@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Cat Leaderboard Archive</title>
+<meta name="description" content="Explore daily cat tournament winners archive.">
+
+<style>
+body{background:#121212;color:white;font-family:Arial;text-align:center}
+.grid{display:flex;flex-wrap:wrap;gap:20px;justify-content:center}
+.card{background:#1b1b1b;padding:15px;border-radius:15px;width:250px}
+img{width:100%;border-radius:10px}
+a{color:#ff69b4;text-decoration:none}
+</style>
+</head>
+
+<body>
+
+<h1>🏆 Cat Leaderboard Archive</h1>
+<p>Last 7 days winners</p>
+
+<div id="grid" class="grid"></div>
+
+<script>
+fetch("/data/leaderboard-archive.json")
+.then(res=>res.json())
+.then(data=>{
+  const grid = document.getElementById("grid");
+
+  data.days.slice(0,7).forEach(day=>{
+    const top = day.winners[0];
+
+    const div = document.createElement("div");
+    div.className="card";
+
+    div.innerHTML = `
+      <h3>${day.title}</h3>
+      <img src="${top.image}">
+      <p>#1 Winner</p>
+      <a href="/winner.html?date=${day.date}">View</a>
+    `;
+
+    grid.appendChild(div);
+  });
+});
+</script>
+
+</body>
+</html>
