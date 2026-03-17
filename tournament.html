@@ -902,7 +902,20 @@ function renderCurrentMatch() {
     return;
   }
 
-  currentPair = [round[currentMatchIndex], round[currentMatchIndex + 1]];
+  const left = round[currentMatchIndex];
+  const right = round[currentMatchIndex + 1];
+
+  if (!left || !right) {
+    document.getElementById("loadingNote").textContent = "Bracket data was incomplete. Reloading today’s tournament...";
+    setTimeout(async () => {
+      const data = await fetchTournament();
+      startTournament(data.cats);
+      await fetchLeaderboard();
+    }, 800);
+    return;
+  }
+
+  currentPair = [left, right];
   hideRoundTransition();
   lockChoices("Loading next matchup...");
 
